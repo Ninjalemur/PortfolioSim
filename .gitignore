@@ -1,1 +1,3 @@
 to_ignore.py
+.venv
+__pycache__/
