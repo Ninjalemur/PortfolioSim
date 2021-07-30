@@ -4,12 +4,26 @@ class Simulator():
     """
     Simulator object that can spawn and run multiple simulations
     """
-    def __init__(self):
+    def __init__(self,historical_data_source='stock-data/us.csv'):
         # needs strategy function to pass to simulations
         # needs to load historical data for instruments
+        self.historical_data = self.__load_historical_data(historical_data_source)
         # needs to load desired income schedule
         # initialise empty container to store results
         pass
+
+    def __load_historical_data(self,historical_data_source):
+        """
+        loads historical data from file to simulator object
+
+        args:
+            historical_data_source: file path
+
+        returns:
+            data frame of historical data
+        """
+        historical_data = pd.read_csv(historical_data_source)
+        return(historical_data)
 
     def run_simulations(self):
         """
@@ -68,3 +82,4 @@ class Simulation():
         logs results to container
         """
         pass
+
