@@ -58,10 +58,28 @@ class Simulator():
                 raise ValueError(f"{i} should be castable to float. received '{income_data[i]}' of type {type(income_data[i])}")
 
         income_schedule = pd.DataFrame({
-            'year':pd.Series([], dtype='str'),
+            'year':pd.Series([], dtype='int'),
             'desired_income':pd.Series([], dtype='float'),
             'min_income':pd.Series([], dtype='float')
             })
+        
+        for i in range(simulation_length_years):
+            income_schedule = income_schedule.append(pd.DataFrame({
+                'year':pd.Series([i+1], dtype='int'),
+                'desired_income':pd.Series(
+                    [income_data['desired_annual_income']*(income_data['inflation']**i)], 
+                    dtype='float'
+                    ),
+                'min_income':pd.Series(
+                    [income_data['min_income_multiplier']*income_data['desired_annual_income']*(income_data['inflation']**i)], 
+                    dtype='float'
+                    )
+                }))
+        income_schedule.reset_index(drop=True, inplace=True)
+        return(income_schedule)
+
+    def _get_income_schedule(self):
+        return(self.__income_schedule)
 
     def run_simulations(self):
         """
