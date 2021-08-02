@@ -5,7 +5,17 @@ class Simulator():
     """
     Simulator object that can spawn and run multiple simulations
     """
-    def __init__(self,income_data,historical_data_source='stock-data/us.csv',simulation_length_years=50):
+    def __init__(
+        self,
+        starting_portfolio_value,
+        desired_annual_income,
+        inflation,
+        min_income_multiplier=0.5,
+        max_withdrawal_rate=0.02,
+        historical_data_source='stock-data/us.csv',
+        simulation_length_years=50,
+        **simulation_cofig
+        ):
         """
         creates simulator object that can run simulations
 
@@ -17,15 +27,60 @@ class Simulator():
         returns:
             data frame of historical data
         """
+        # check validity of config data
+        simulation_cofig['starting_portfolio_value']=starting_portfolio_value
+        simulation_cofig['desired_annual_income']=desired_annual_income
+        simulation_cofig['inflation']=inflation
+        simulation_cofig['min_income_multiplier']=min_income_multiplier
+        simulation_cofig['max_withdrawal_rate']=max_withdrawal_rate
+        simulation_cofig['historical_data_source']=historical_data_source
+        simulation_cofig['simulation_length_years']=simulation_length_years
+        self.__check_config_validity(simulation_cofig)
+        
+
         # needs strategy function to pass to simulations
+
         # needs to load historical data for instruments
         self.__historical_data = self.__load_historical_data(historical_data_source)
 
         # needs to load desired income schedule
-        self.__income_schedule = self.__create_income_schedule(income_data,simulation_length_years)
+        self.__income_schedule = self.__create_income_schedule(
+            desired_annual_income,
+            inflation,
+            min_income_multiplier,
+            simulation_length_years)
 
-        # initialise empty container to store results
-        pass
+        # initialise empty data container to store results
+        self.__results = {
+            'simulator inputs': {
+                'starting_portfolio_value': simulation_cofig['starting_portfolio_value'],
+                'desired_annual_income': simulation_cofig['desired_annual_income'],
+                'inflation': simulation_cofig['inflation'],
+                'min_income_multiplier': simulation_cofig['min_income_multiplier'],
+                'max_withdrawal_rate': simulation_cofig['max_withdrawal_rate'],
+                }
+        }
+
+    def __check_config_validity(self,simulation_cofig):
+        mandatory_fields=['desired_annual_income', 'inflation','starting_portfolio_value']
+        float_fields = ['desired_annual_income', 'inflation', 'min_income_multiplier','starting_portfolio_value','max_withdrawal_rate'],
+        int_fields = ['simulation_length_years']
+        for i in float_fields:
+            try:
+                float(simulation_cofig[i])
+            except ValueError:
+                raise ValueError(f"{i} should be castable to float. received '{simulation_cofig[i]}' of type {type(simulation_cofig[i])}")
+            except KeyError:
+                pass
+
+        for i in int_fields:
+            try:
+                int(simulation_cofig[i])
+            except ValueError:
+                raise ValueError(f"{i} should be castable to int. received '{simulation_cofig[i]}' of type {type(simulation_cofig[i])}")
+            except KeyError:
+                pass
+        ### mandatory field check
 
     def __load_historical_data(self,historical_data_source):
         """
@@ -40,22 +95,21 @@ class Simulator():
         historical_data = pd.read_csv(historical_data_source)
         return(historical_data)
 
-    def __create_income_schedule(self,income_data,simulation_length_years):
+    def __create_income_schedule(
+        self,
+        desired_annual_income,
+        inflation,
+        min_income_multiplier,
+        simulation_length_years):
         """
         creates income schedule
 
         args:
-            income_data: dictionary containing desired_annual_income, inflation, min_income_multiplier
+            simulation_cofig: dictionary containing desired_annual_income, inflation, min_income_multiplier
 
         returns:
             income schedule: data frame containing year, desired_income, min_income
         """
-        # check income data inputs
-        for i in ['desired_annual_income', 'inflation', 'min_income_multiplier']:
-            try:
-                float(income_data[i])
-            except ValueError:
-                raise ValueError(f"{i} should be castable to float. received '{income_data[i]}' of type {type(income_data[i])}")
 
         income_schedule = pd.DataFrame({
             'year':pd.Series([], dtype='int'),
@@ -63,15 +117,16 @@ class Simulator():
             'min_income':pd.Series([], dtype='float')
             })
         
+
         for i in range(simulation_length_years):
             income_schedule = income_schedule.append(pd.DataFrame({
                 'year':pd.Series([i+1], dtype='int'),
                 'desired_income':pd.Series(
-                    [income_data['desired_annual_income']*(income_data['inflation']**i)], 
+                    [desired_annual_income*(inflation**i)], 
                     dtype='float'
                     ),
                 'min_income':pd.Series(
-                    [income_data['min_income_multiplier']*income_data['desired_annual_income']*(income_data['inflation']**i)], 
+                    [min_income_multiplier*desired_annual_income*(inflation**i)], 
                     dtype='float'
                     )
                 }))
