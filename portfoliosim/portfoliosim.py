@@ -88,11 +88,11 @@ class Simulator():
         # initialise empty data container to store results
         self.__results = {
             'simulator inputs': {
-                'starting_portfolio_value': simulation_cofig['starting_portfolio_value'],
-                'desired_annual_income': simulation_cofig['desired_annual_income'],
-                'inflation': simulation_cofig['inflation'],
-                'min_income_multiplier': simulation_cofig['min_income_multiplier'],
-                'max_withdrawal_rate': simulation_cofig['max_withdrawal_rate'],
+                'starting_portfolio_value': starting_portfolio_value,
+                'desired_annual_income': desired_annual_income,
+                'inflation': inflation,
+                'min_income_multiplier': min_income_multiplier,
+                'max_withdrawal_rate': max_withdrawal_rate,
                 }
         }
 
