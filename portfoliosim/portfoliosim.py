@@ -19,12 +19,45 @@ class Simulator():
         """
         creates simulator object that can run simulations
 
-        args:
-            income_data: dictionary containing desired_annual_income, inflation, min_income_multiplier
-            historical_data_source: file path to historical income data csv
+        Parameters:
+            starting_portfolio_value: float, int
+                Starting value of portfolio. Must be greater than 0
+                Eg 100000
 
+            desired_annual_income: float, int
+                desired initial annual income. Must be greater than 0
+                Eg 10000
 
-        returns:
+            inflation: float
+                annual inflation rate. Must be 1 or greater. Set to 1 for no inflation
+                Eg 1.02 (signifies 2% inflation)
+
+            min_income_multiplier: float, default 0.5
+                Multiplier signifying the minimum income relative to the desired income that one can accept
+                Used when withdrawal rate would exceed max_withdrawal_rate. Min income is withdrawn instead
+                Value should be between 0 and 1
+                Eg 0.5 means that half of the desired annual income will be withdrawn when half the desired 
+                income exceeds the withdrawal rate
+
+            max_withdrawal_rate: float, default 0.02
+                Maximum withdrawal rate before withdrawals get restricted. If desired withdrawal is more than
+                max_withdrawal_rate, max_withdrawal_rate will be withdrawn instead
+                Eg 0.02 denotes a desired max withdrawal rate of 2%
+
+            historical_data_source: file_path, default 'stock-data/us.csv'
+                file path to historical income data csv
+                data should contain 
+                    year: year of this row of data (eg 1970)
+                    month: month of this row of data (1-12)
+                    gold: price of gold this month (relative to gold in other months)
+                    stocks: price of stocks this month (relative to stocks in other months)
+                    bonds: price of bonds this month (relative to bonds in other months)
+
+            simulation_length_years: int. default 50
+                length of the simulation in years
+                must be greater than 0
+
+        Returns:
             data frame of historical data
         """
         # check validity of config data
@@ -63,7 +96,7 @@ class Simulator():
 
     def __check_config_validity(self,simulation_cofig):
         mandatory_fields=['desired_annual_income', 'inflation','starting_portfolio_value']
-        float_fields = ['desired_annual_income', 'inflation', 'min_income_multiplier','starting_portfolio_value','max_withdrawal_rate'],
+        float_fields = ['desired_annual_income', 'inflation', 'min_income_multiplier','starting_portfolio_value','max_withdrawal_rate']
         int_fields = ['simulation_length_years']
         for i in float_fields:
             try:
@@ -80,7 +113,7 @@ class Simulator():
                 raise ValueError(f"{i} should be castable to int. received '{simulation_cofig[i]}' of type {type(simulation_cofig[i])}")
             except KeyError:
                 pass
-        ### mandatory field check
+        
 
     def __load_historical_data(self,historical_data_source):
         """
