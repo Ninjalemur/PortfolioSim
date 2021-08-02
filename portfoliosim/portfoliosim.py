@@ -29,7 +29,7 @@ class Simulator():
                 Eg 10000
 
             inflation: float
-                annual inflation rate. Must be 1 or greater. Set to 1 for no inflation
+                annual inflation rate. Must be 0 or greater. Set to 1 for no inflation. 0 to 1 indicates deflation
                 Eg 1.02 (signifies 2% inflation)
 
             min_income_multiplier: float, default 0.5
@@ -42,6 +42,7 @@ class Simulator():
             max_withdrawal_rate: float, default 0.02
                 Maximum withdrawal rate before withdrawals get restricted. If desired withdrawal is more than
                 max_withdrawal_rate, max_withdrawal_rate will be withdrawn instead
+                should be a value between 0 and 1
                 Eg 0.02 denotes a desired max withdrawal rate of 2%
 
             historical_data_source: file_path, default 'stock-data/us.csv'
