@@ -29,7 +29,8 @@ class Simulator():
                 Eg 10000
 
             inflation: float
-                annual inflation rate. Must be 0 or greater. Set to 1 for no inflation. 0 to 1 indicates deflation
+                annual inflation rate. Must be 0 or greater. Set to 1 for no inflation. Above 0 but less than 1
+                indicates deflation
                 Eg 1.02 (signifies 2% inflation)
 
             min_income_multiplier: float, default 0.5
@@ -96,7 +97,6 @@ class Simulator():
         }
 
     def __check_config_validity(self,simulation_cofig):
-        mandatory_fields=['desired_annual_income', 'inflation','starting_portfolio_value']
         float_fields = ['desired_annual_income', 'inflation', 'min_income_multiplier','starting_portfolio_value','max_withdrawal_rate']
         int_fields = ['simulation_length_years']
         for i in float_fields:
@@ -104,17 +104,35 @@ class Simulator():
                 float(simulation_cofig[i])
             except ValueError:
                 raise ValueError(f"{i} should be castable to float. received '{simulation_cofig[i]}' of type {type(simulation_cofig[i])}")
-            except KeyError:
-                pass
+            # except KeyError:
+            #     pass
 
         for i in int_fields:
             try:
                 int(simulation_cofig[i])
             except ValueError:
                 raise ValueError(f"{i} should be castable to int. received '{simulation_cofig[i]}' of type {type(simulation_cofig[i])}")
-            except KeyError:
-                pass
+            # except KeyError:
+            #     pass
         
+        # check that certain inputs are above 0
+        above_zero_fields = ['starting_portfolio_value','desired_annual_income','inflation','simulation_length_years']
+        for i in above_zero_fields:
+            if simulation_cofig[i] <= 0:
+                raise ValueError( f"{i} should be greater than zero. received '{simulation_cofig[i]}'")
+
+        # check that certain inputs are between 0 and 1
+        between_zero_and_one_fields = ['min_income_multiplier']
+        for i in between_zero_and_one_fields:
+            if not (0 <= simulation_cofig[i] <= 1):
+                raise ValueError(f"{i} should be between 0 and 1 inclusive. received '{simulation_cofig[i]}'")            
+
+        # check that certain inputs are between positive and <=1
+        positive_less_than_equal_to_one_fields = ['max_withdrawal_rate']
+        for i in positive_less_than_equal_to_one_fields:
+            if not (0 < simulation_cofig[i] <= 1):
+                raise ValueError(f"{i} should be greater than zero and less than or equal to one. received '{simulation_cofig[i]}'")            
+               
 
     def __load_historical_data(self,historical_data_source):
         """
