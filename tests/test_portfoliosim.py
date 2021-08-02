@@ -244,4 +244,3 @@ def test_simulator_check_simulation_length_years_above_zero():
         except ValueError as ve:
             assert str(ve) == f"simulation_length_years should be greater than zero. received '{i}'"
 
-# test simulation length greater than 0
