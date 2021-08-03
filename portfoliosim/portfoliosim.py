@@ -72,6 +72,7 @@ class Simulator():
         simulation_cofig['simulation_length_years']=simulation_length_years
         self.__check_config_validity(simulation_cofig)
         
+        self.__simulation_config = simulation_cofig
 
         # needs strategy function to pass to simulations
 
@@ -189,10 +190,99 @@ class Simulator():
         return(self.__income_schedule)
 
     def run_simulations(self):
+        """ 
+        wrapper to call run_simulations_wrapped
         """
-        runs simulations one after another and collects results
+
+        self.__run_simulations_wrapped(
+            historical_data=self.__historical_data,
+            income_schedule=self.__income_schedule,
+            **self.__simulation_config
+        )
+
+    def __run_simulations_wrapped(
+        self,
+        starting_portfolio_value,
+        desired_annual_income,
+        inflation,
+        max_withdrawal_rate,
+        income_schedule,
+        historical_data,
+        simulation_length_years,
+        **kwargs
+        ):
         """
+        Iteratively create and run simulations using different time frames
+
+        Parameters:
+            starting_portfolio_value: float, int
+                Starting value of portfolio. Must be greater than 0
+                Eg 100000
+
+            desired_annual_income: float, int
+                desired initial annual income. Must be greater than 0
+                Eg 10000
+
+            inflation: float
+                annual inflation rate. Must be 0 or greater. Set to 1 for no inflation. Above 0 but less than 1
+                indicates deflation
+                Eg 1.02 (signifies 2% inflation)
+
+            max_withdrawal_rate: float, default 0.02
+                Maximum withdrawal rate before withdrawals get restricted. If desired withdrawal is more than
+                max_withdrawal_rate, max_withdrawal_rate will be withdrawn instead
+                should be a value between 0 and 1
+                Eg 0.02 denotes a desired max withdrawal rate of 2%
+
+            historical_data_source: data frame
+                data frame containing historical asset prices
+                data should contain 
+                    year: year of this row of data (eg 1970)
+                    month: month of this row of data (1-12)
+                    gold: price of gold this month (relative to gold in other months)
+                    stocks: price of stocks this month (relative to stocks in other months)
+                    bonds: price of bonds this month (relative to bonds in other months)
+
+            simulation_length_years: int. default 50
+                length of the simulation in years
+                must be greater than 0
+        """
+        
+        # get different time frames
+        simulation_time_frames = self._generate_simulation_time_frames(historical_data,simulation_length_years)
+
+        # for each time frame
+        #       initialise simulation
+        #       run simulation
+        #       extract simulation results and append to simulator results
+
         pass
+
+    def _generate_simulation_time_frames(self,historical_data,simulation_length_years):
+        """
+        generate time frames to use for simulations
+
+        Parameters:
+            starting_portfolio_value: float, int
+                Starting value of portfolio. Must be greater than 0
+                Eg 100000
+
+        Returns:
+            time_frames: of time frames to run. Each list entry is a data frame containing 
+            the time frame that should be run for a particular simulation. Each time frame contains 
+            12 rows per year in  simulation_length_years
+        """
+
+        time_frames_list = []
+
+        number_of_frames = len(historical_data) - (12 * simulation_length_years) + 1
+
+        for i in range(number_of_frames):
+            df = historical_data[i:(i+12*simulation_length_years)]
+            df.reset_index(inplace=True,drop=True)
+            time_frames_list.append(df)
+
+        return(time_frames_list)
 
     def read_results(self):
         """
