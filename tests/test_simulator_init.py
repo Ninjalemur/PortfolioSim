@@ -244,3 +244,69 @@ def test_simulator_check_simulation_length_years_above_zero():
         except ValueError as ve:
             assert str(ve) == f"simulation_length_years should be greater than zero. received '{i}'"
 
+def test_simulator_check_for_valid_assets_in_portfolio():
+    """
+    ensure that Simulator flags portfolio asset classes other than stocks, bonds, cash, gold
+    Only asset classes stocks, bonds, cash, gold allowed
+    """
+    simulation_cofig = {
+        "starting_portfolio_value": 1000000,
+        "desired_annual_income": 100000,
+        "min_income_multiplier": 0.75,
+        "inflation" : 1.025,
+        "max_withdrawal_rate" : 0.02,
+        "portfolio_allocation" : {
+            'cats' : 0.6,
+            'gold' : 0.4
+            }
+        }
+    
+    try:
+        x = ps.Simulator(**simulation_cofig)
+        assert False, 'ValueError should be raised when portfolio_allocation contains keys other than stocks, bonds, cash, gold'
+    except TypeError as ve:
+        assert str(ve) == f"portfolio assets should only be stocks, bonds, cash, gold. received 'cats'"
+
+def test_simulator_check_for_portfolio_allocation_type():
+    """
+    ensure that Simulator flags portfolio allocations that cannot be converted to float
+    Only values that can be converted to float are allowed
+    """
+    simulation_cofig = {
+        'starting_portfolio_value': 1000000.0,
+        "desired_annual_income": 10000,
+        "inflation": 1.027,
+        "min_income_multiplier": 0.75,
+        "max_withdrawal_rate" : 0.02,
+        "portfolio_allocation" : {
+            'stocks' : 'a',
+            'gold' : 0.4
+            }
+        }
+    try:
+        x = ps.Simulator(**simulation_cofig)
+        assert False, 'ValueError should be raised when protfolio_allocation value in simulation_cofig cannot be coerced to float'
+    except ValueError as ve:
+        assert str(ve) == "portfolio_allocation for stocks should be castable to float. received 'a' of type <class 'str'>"
+
+def test_simulator_check_for_portfolio_allocation_type():
+    """
+    ensure that Simulator flags portfolio allocations are below zero
+    Only values that are above 1 are allowed
+    """
+    simulation_cofig = {
+        'starting_portfolio_value': 1000000.0,
+        "desired_annual_income": 10000,
+        "inflation": 1.027,
+        "min_income_multiplier": 0.75,
+        "max_withdrawal_rate" : 0.02,
+        "portfolio_allocation" : {
+            'stocks' : -0.5,
+            'gold' : 0.4
+            }
+        }
+    try:
+        x = ps.Simulator(**simulation_cofig)
+        assert False, 'ValueError should be raised when protfolio_allocation value in simulation_cofig are at least zero'
+    except ValueError as ve:
+        assert str(ve) == "portfolio_allocation for stocks should be at least zero. received '-0.5'"

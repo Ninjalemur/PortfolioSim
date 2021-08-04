@@ -14,6 +14,12 @@ class Simulator():
         max_withdrawal_rate=0.02,
         historical_data_source='stock-data/us.csv',
         simulation_length_years=50,
+        portfolio_allocation={
+            'stocks' : 0.6,
+            'bonds' : 0.4,
+            'gold' : 0.0,
+            'cash' : 0.0
+            },
         **simulation_cofig
         ):
         """
@@ -58,10 +64,10 @@ class Simulator():
             simulation_length_years: int. default 50
                 length of the simulation in years
                 must be greater than 0
-
-        Returns:
-            data frame of historical data
-        """
+            
+            portfolio_allocation: dict, default {'stocks' : 0.6,'bonds' : 0.4,'gold' : 0.0,'cash' : 0.0}
+                portfolio allocation among asset classes
+            """
         # check validity of config data
         simulation_cofig['starting_portfolio_value']=starting_portfolio_value
         simulation_cofig['desired_annual_income']=desired_annual_income
@@ -70,6 +76,7 @@ class Simulator():
         simulation_cofig['max_withdrawal_rate']=max_withdrawal_rate
         simulation_cofig['historical_data_source']=historical_data_source
         simulation_cofig['simulation_length_years']=simulation_length_years
+        simulation_cofig['portfolio_allocation']=portfolio_allocation
         self.__check_config_validity(simulation_cofig)
         
         self.__simulation_config = simulation_cofig
@@ -100,22 +107,39 @@ class Simulator():
     def __check_config_validity(self,simulation_cofig):
         float_fields = ['desired_annual_income', 'inflation', 'min_income_multiplier','starting_portfolio_value','max_withdrawal_rate']
         int_fields = ['simulation_length_years']
+
         for i in float_fields:
             try:
                 float(simulation_cofig[i])
             except ValueError:
                 raise ValueError(f"{i} should be castable to float. received '{simulation_cofig[i]}' of type {type(simulation_cofig[i])}")
-            # except KeyError:
-            #     pass
+            
 
         for i in int_fields:
             try:
                 int(simulation_cofig[i])
             except ValueError:
                 raise ValueError(f"{i} should be castable to int. received '{simulation_cofig[i]}' of type {type(simulation_cofig[i])}")
-            # except KeyError:
-            #     pass
         
+        # check portfolio allocation values are castable to floats
+        for key,value in simulation_cofig['portfolio_allocation'].items():
+            try:
+                float(value)
+            except ValueError:
+                raise ValueError(f"portfolio_allocation for {key} should be castable to float. received '{value}' of type {type(value)}")
+        
+        # check that portfolio asset classes are allowed types
+        allowed_asset_classes = ('stocks','bonds','gold','cash')
+        for key in simulation_cofig['portfolio_allocation']:
+            if key not in allowed_asset_classes:
+                raise TypeError(f"portfolio assets should only be stocks, bonds, cash, gold. received '{key}'")
+
+        # check portfolio_allocation values are above at least zero
+        for key,value in simulation_cofig['portfolio_allocation'].items():
+            if float(value) < 0:
+                raise ValueError(f"portfolio_allocation for {key} should be at least zero. received '{value}'")
+        
+
         # check that certain inputs are above 0
         above_zero_fields = ['starting_portfolio_value','desired_annual_income','inflation','simulation_length_years']
         for i in above_zero_fields:
@@ -203,12 +227,11 @@ class Simulator():
     def __run_simulations_wrapped(
         self,
         starting_portfolio_value,
-        desired_annual_income,
-        inflation,
         max_withdrawal_rate,
         income_schedule,
         historical_data,
         simulation_length_years,
+        portfolio_allocation,
         **kwargs
         ):
         """
@@ -222,11 +245,6 @@ class Simulator():
             desired_annual_income: float, int
                 desired initial annual income. Must be greater than 0
                 Eg 10000
-
-            inflation: float
-                annual inflation rate. Must be 0 or greater. Set to 1 for no inflation. Above 0 but less than 1
-                indicates deflation
-                Eg 1.02 (signifies 2% inflation)
 
             max_withdrawal_rate: float, default 0.02
                 Maximum withdrawal rate before withdrawals get restricted. If desired withdrawal is more than
@@ -251,10 +269,18 @@ class Simulator():
         # get different time frames
         simulation_time_frames = self._generate_simulation_time_frames(historical_data,simulation_length_years)
 
-        # for each time frame
-        #       initialise simulation
-        #       run simulation
-        #       extract simulation results and append to simulator results
+        for historical_data_subset in simulation_time_frames:
+            pass
+            #       initialise simulation
+            sim = Simulation(
+                starting_portfolio_value,
+                max_withdrawal_rate,
+                income_schedule,
+                historical_data_subset,
+                portfolio_allocation
+                )
+            #       run simulation
+            #       extract simulation results and append to simulator results
 
         pass
 
@@ -291,14 +317,36 @@ class Simulator():
         pass
 
 class Simulation():
-    def __init__(self):
+    def __init__(
+        self,
+        starting_portfolio_value,
+        max_withdrawal_rate,
+        income_schedule,
+        historical_data_subset,
+        portfolio_allocation
+        ):
         """
         Simulation that simulates portfolio withdrawal over a time frame and records how well portfolio and strategy perform
         """
-        # need to track portfolio allocation
-        # need to have historical data reference
-        # need desired income schedule
+        # allocate portfolio
+
+        self.__historical_data_subset =  historical_data_subset
+        self.__income_schedule = income_schedule
+        self.__max_withdrawal_rate = max_withdrawal_rate
+
         # need empty container to store results
+        run_timestep_data = pd.DataFrame({
+            'year':pd.Series([], dtype='int'),
+            'cash_buffer':pd.Series([], dtype='float'),
+            'bonds_qty':pd.Series([], dtype='float'),
+            'stocks_qty':pd.Series([], dtype='float'),
+            'gold_qty':pd.Series([], dtype='float'),
+            'bonds_value':pd.Series([], dtype='float'),
+            'stocks_value':pd.Series([], dtype='float'),
+            'gold_value':pd.Series([], dtype='float'),
+            'cash_value':pd.Series([], dtype='float'),
+            'withdrawal':pd.Series([], dtype='float'),
+            })
         pass
 
     def run(self):
