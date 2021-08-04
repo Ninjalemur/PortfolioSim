@@ -47,15 +47,3 @@ def test_simulator_run_get_timeframe():
     pd.testing.assert_frame_equal(time_frames[-1],last_time_frame)
 
    
-    # try:
-    #     simulation_cofig = {
-    #         'starting_portfolio_value': 1000000.0,
-    #         "desired_annual_income": 100000.0,
-    #         "inflation": 1.01,
-    #         "min_income_multiplier": 0.5,
-    #         "max_withdrawal_rate" : 0.02
-    #         }
-    #     x = ps.Simulator(**simulation_cofig)
-    #     assert False, 'ValueError should be raised when desired_annual_income in simulation_cofig cannot be coerced to float'
-    # except ValueError as ve:
-    #     assert str(ve) == "desired_annual_income should be castable to float. received 'a' of type <class 'str'>"
