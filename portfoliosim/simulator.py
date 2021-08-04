@@ -21,6 +21,7 @@ class Simulator():
             'gold' : 0.0,
             'cash' : 0.0
             },
+        cash_buffer_years=0,
         **simulation_cofig
         ):
         """
@@ -65,6 +66,10 @@ class Simulator():
             simulation_length_years: int. default 50
                 length of the simulation in years
                 must be greater than 0
+
+            cash_buffer_years: int. default 0
+                number of years of cash buffer to keep
+                cash buffer is used to avoid drawing down from portfolio during downturns
             
             portfolio_allocation: dict, default {'stocks' : 0.6,'bonds' : 0.4,'gold' : 0.0,'cash' : 0.0}
                 portfolio allocation among asset classes
@@ -78,6 +83,7 @@ class Simulator():
         simulation_cofig['historical_data_source']=historical_data_source
         simulation_cofig['simulation_length_years']=simulation_length_years
         simulation_cofig['portfolio_allocation']=portfolio_allocation
+        simulation_cofig['cash_buffer_years']=cash_buffer_years
         self.__check_config_validity(simulation_cofig)
         
         self.__simulation_config = simulation_cofig
@@ -147,13 +153,20 @@ class Simulator():
             if simulation_cofig[i] <= 0:
                 raise ValueError( f"{i} should be greater than zero. received '{simulation_cofig[i]}'")
 
-        # check that certain inputs are between 0 and 1
+        # check that certain inputs are at least 0
+        at_least_zero_fields = ['cash_buffer_years']
+        for i in at_least_zero_fields:
+            if simulation_cofig[i] < 0:
+                raise ValueError( f"{i} should be at least zero. received '{simulation_cofig[i]}'")
+
+
+        # check that certain inputs are between 0 and 1 inclusive
         between_zero_and_one_fields = ['min_income_multiplier']
         for i in between_zero_and_one_fields:
             if not (0 <= simulation_cofig[i] <= 1):
                 raise ValueError(f"{i} should be between 0 and 1 inclusive. received '{simulation_cofig[i]}'")            
 
-        # check that certain inputs are between positive and <=1
+        # check that certain inputs are  positive and <=1
         positive_less_than_equal_to_one_fields = ['max_withdrawal_rate']
         for i in positive_less_than_equal_to_one_fields:
             if not (0 < simulation_cofig[i] <= 1):

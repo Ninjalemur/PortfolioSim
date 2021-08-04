@@ -162,7 +162,7 @@ def test_simulator_check_desired_annual_income_above_zero():
 def test_simulator_check_inflation_above_zero():
     """
     ensure that Simulator flags inflation not above zero
-    Only inflation between above zero
+    Only inflation above zero
     """
     simulation_cofig = {
         "starting_portfolio_value": 1000000,
@@ -310,3 +310,24 @@ def test_simulator_check_for_portfolio_allocation_type():
         assert False, 'ValueError should be raised when protfolio_allocation value in simulation_cofig are at least zero'
     except ValueError as ve:
         assert str(ve) == "portfolio_allocation for stocks should be at least zero. received '-0.5'"
+
+def test_simulator_check_cash_buffer_years_at_least_zero():
+    """
+    ensure that Simulator flags cash_buffer_years not at least 0
+    Only cash_buffer_years at least 0 should be accepted
+    """
+    simulation_cofig = {
+        "starting_portfolio_value": 1000000,
+        "desired_annual_income": 100000,
+        "inflation": 1.026,
+        "min_income_multiplier": 0.75,
+        "simulation_length_years" : 30,
+        "max_withdrawal_rate" : 0.02,
+        'cash_buffer_years': -1
+        }
+
+    try:
+        x = ps.Simulator(**simulation_cofig)
+        assert False, 'ValueError should be raised when cash_buffer_years is not at least 0'
+    except ValueError as ve:
+        assert str(ve) == "cash_buffer_years should be at least zero. received '-1'"
