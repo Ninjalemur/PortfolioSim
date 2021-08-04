@@ -62,7 +62,7 @@ class Simulation():
             'withdrawal':pd.Series([], dtype='float'),
             })
 
-        # normalise portfolio_allocation
+        # normalise portfolio_allocation so that they total up to 1
         portfolio_allocation = self.__normalise_portfolio_allocation(portfolio_allocation)
     
         # store information
