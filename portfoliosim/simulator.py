@@ -246,6 +246,7 @@ class Simulator():
         historical_data,
         simulation_length_years,
         portfolio_allocation,
+        cash_buffer_years,
         **kwargs
         ):
         """
@@ -256,11 +257,10 @@ class Simulator():
                 Starting value of portfolio. Must be greater than 0
                 Eg 100000
 
-            desired_annual_income: float, int
-                desired initial annual income. Must be greater than 0
-                Eg 10000
+            income_schedule: dataframe
+                data frame containing year on year values for desired and minimum income
 
-            max_withdrawal_rate: float, default 0.02
+            max_withdrawal_rate: float
                 Maximum withdrawal rate before withdrawals get restricted. If desired withdrawal is more than
                 max_withdrawal_rate, max_withdrawal_rate will be withdrawn instead
                 should be a value between 0 and 1
@@ -275,9 +275,16 @@ class Simulator():
                     stocks: price of stocks this month (relative to stocks in other months)
                     bonds: price of bonds this month (relative to bonds in other months)
 
-            simulation_length_years: int. default 50
+            simulation_length_years: int
                 length of the simulation in years
                 must be greater than 0
+
+            cash_buffer_years: int
+                number of years of cash buffer to keep
+                cash buffer is used to avoid drawing down from portfolio during downturns
+            
+            portfolio_allocation: dict
+                portfolio allocation among asset classes
         """
         
         # get different time frames
@@ -291,7 +298,8 @@ class Simulator():
                 max_withdrawal_rate,
                 income_schedule,
                 historical_data_subset,
-                portfolio_allocation
+                portfolio_allocation,
+                cash_buffer_years
                 )
             #       run simulation
             #       extract simulation results and append to simulator results
