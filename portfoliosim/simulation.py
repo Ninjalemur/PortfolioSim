@@ -194,6 +194,9 @@ class Simulation():
         # allocate portfolio
         self.allocate_portfolio(portfolio_allocation,historical_data_subset.iloc[0])
 
+        # set initial prices
+        self.update_prices(0)
+
     def allocate_portfolio(self,portfolio_allocation,current_prices):
         """
         allocate portfolio based on desired allocation and current prices
@@ -220,7 +223,6 @@ class Simulation():
         instrument prices update first, then strategy is executed
         """
         self.update_prices(timestep_number)
-        # print(self.get_current_prices())
         self.execute_strategy()
         self.log_results()
     
@@ -228,7 +230,7 @@ class Simulation():
         """
         update prices based on the current timestep
         """
-        # self.__current_prices = self.__historical_data_subset.iloc[timestep_number*12]
+        self.__current_prices = self.__historical_data_subset.iloc[timestep_number]
         pass
 
     def execute_strategy(self):
