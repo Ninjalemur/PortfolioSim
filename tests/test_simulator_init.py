@@ -331,3 +331,4 @@ def test_simulator_check_cash_buffer_years_at_least_zero():
         assert False, 'ValueError should be raised when cash_buffer_years is not at least 0'
     except ValueError as ve:
         assert str(ve) == "cash_buffer_years should be at least zero. received '-1'"
+

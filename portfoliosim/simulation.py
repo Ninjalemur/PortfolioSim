@@ -69,8 +69,8 @@ class Simulation():
         self.__historical_data_subset =  historical_data_subset
         self.__income_schedule = income_schedule
         self.__max_withdrawal_rate = max_withdrawal_rate
-        self.__income_schedule = income_schedule,
-        self.__portfolio_allocation = portfolio_allocation,
+        self.__income_schedule = income_schedule
+        self.__portfolio_allocation = portfolio_allocation
         self.__cash_buffer_years = cash_buffer_years
         
         self.__initialise_portfolio_cash_buffer(
@@ -126,6 +126,9 @@ class Simulation():
 
     def get_cash_buffer(self):
         return(self.__cash_buffer)
+
+    def get_current_prices(self):
+        return(self.__current_prices)
 
     def __initialise_cash_buffer(
         self,
@@ -207,22 +210,25 @@ class Simulation():
         """
         runs simulation
         """
-        pass
+        for i in range(len(self.__income_schedule)):
+            self.run_timestep(i)
 
-    def run_timestep(self):
+    def run_timestep(self,timestep_number):
         """
         runs a single time step of the simulation
 
         instrument prices update first, then strategy is executed
         """
-        self.update_prices()
+        self.update_prices(timestep_number)
+        # print(self.get_current_prices())
         self.execute_strategy()
         self.log_results()
     
-    def update_prices(self):
+    def update_prices(self,timestep_number):
         """
-        update prices based on the current date
+        update prices based on the current timestep
         """
+        # self.__current_prices = self.__historical_data_subset.iloc[timestep_number*12]
         pass
 
     def execute_strategy(self):

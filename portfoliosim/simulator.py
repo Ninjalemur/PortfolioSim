@@ -318,7 +318,7 @@ class Simulator():
         Returns:
             time_frames: of time frames to run. Each list entry is a data frame containing 
             the time frame that should be run for a particular simulation. Each time frame contains 
-            12 rows per year in  simulation_length_years
+            1 rows per year in  simulation_length_years. Other 11 months per year are not needed
         """
 
         time_frames_list = []
@@ -327,6 +327,7 @@ class Simulator():
 
         for i in range(number_of_frames):
             df = historical_data[i:(i+12*simulation_length_years)]
+            df = df[::12]
             df.reset_index(inplace=True,drop=True)
             time_frames_list.append(df)
 
