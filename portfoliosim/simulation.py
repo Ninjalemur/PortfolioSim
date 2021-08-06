@@ -223,7 +223,7 @@ class Simulation():
         instrument prices update first, then strategy is executed
         """
         self.update_prices(timestep_number)
-        self.execute_strategy()
+        self.execute_strategy(timestep_number)
         self.log_results()
     
     def update_prices(self,timestep_number):
@@ -233,12 +233,30 @@ class Simulation():
         self.__current_prices = self.__historical_data_subset.iloc[timestep_number]
         pass
 
-    def execute_strategy(self):
+    def execute_strategy(self,timestep_number):
         """
         executes strategy.
         rebalancing and withdrawals happen here
         """
+
+        desired_allowance = self._get_desired_allowance(timestep_number)
+        
         pass
+
+    def _get_desired_allowance(self,timestep):
+        """
+        get desired_allowance for a specific timestep
+
+        Parameters:
+            timestep: int
+                timestep to retrieve desired_allowance for
+
+        Returns:
+            desired_allowance: float
+                desired_allowance for this year of the simulation
+        """
+
+        return(self.__income_schedule.iloc[timestep]['desired_income'])
 
     def log_results(self):
         """
