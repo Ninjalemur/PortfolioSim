@@ -258,6 +258,21 @@ class Simulation():
 
         return(self.__income_schedule.iloc[timestep]['desired_income'])
 
+    def _get_min_income(self,timestep):
+        """
+        get min_income for a specific timestep
+
+        Parameters:
+            timestep: int
+                timestep to retrieve min_income for
+
+        Returns:
+            min_income: float
+                min_income for this year of the simulation
+        """
+
+        return(self.__income_schedule.iloc[timestep]['min_income'])
+
     def log_results(self):
         """
         logs results to container
