@@ -73,6 +73,7 @@ class Simulation():
         self.__portfolio_allocation = portfolio_allocation
         self.__cash_buffer_years = cash_buffer_years
         self.__allowance = 0
+        self.__failed = False
         
         self.__initialise_portfolio_cash_buffer(
             starting_portfolio_value,
