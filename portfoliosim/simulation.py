@@ -330,7 +330,8 @@ class Simulation():
         """
         # subtract amount from cash_buffer
         # add amount to allowance
-        pass
+        self.__cash_buffer -= amount
+        self.__allowance += amount
 
     def _check_cash_buffer_enough_funds_for_allowance(self,cash_buffer,desired_allowance):
         """
