@@ -174,7 +174,10 @@ class Simulation():
             current_year: int
                 current year in the simulation
         """
-        desired_cash_buffer = income_schedule['desired_income'][current_year:current_year+cash_buffer_years].sum()
+        if current_year+cash_buffer_years > len(income_schedule):
+            desired_cash_buffer = income_schedule['desired_income'][current_year:len(income_schedule)].sum()
+        else:
+            desired_cash_buffer = income_schedule['desired_income'][current_year:current_year+cash_buffer_years].sum()
         return(desired_cash_buffer)
 
     def __initialise_portfolio(
