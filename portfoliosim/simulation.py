@@ -126,6 +126,9 @@ class Simulation():
     def get_portfolio(self):
         return(self.__portfolio)
 
+    def get_allowance(self):
+        return(self.__allowance)
+
     def get_cash_buffer(self):
         return(self.__cash_buffer)
 
@@ -230,6 +233,8 @@ class Simulation():
         runs a single time step of the simulation
 
         instrument prices update first, then strategy is executed
+
+        timesteps run from 0 to n-1
         """
         self.__allowance = 0
         self.update_prices(timestep_number)
