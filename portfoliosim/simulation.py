@@ -72,6 +72,7 @@ class Simulation():
         self.__income_schedule = income_schedule
         self.__portfolio_allocation = portfolio_allocation
         self.__cash_buffer_years = cash_buffer_years
+        self.__allowance = 0
         
         self.__initialise_portfolio_cash_buffer(
             starting_portfolio_value,
@@ -130,6 +131,9 @@ class Simulation():
     def get_current_prices(self):
         return(self.__current_prices)
 
+    def get_max_withdrawal_rate(self):
+        return(self.__max_withdrawal_rate)
+
     def __initialise_cash_buffer(
         self,
         starting_portfolio_value,
@@ -156,7 +160,8 @@ class Simulation():
         current_year
         ):
         """
-        Compute and return the desired cash buffer
+        Compute and return the desired cash buffer. Note that cash buffer
+        holds desired income from NEXT year onwards
 
         Parameters:
             income_schedule: Data Frame
@@ -168,7 +173,7 @@ class Simulation():
             current_year: int
                 current year in the simulation
         """
-        desired_cash_buffer = income_schedule['desired_income'][current_year-1:current_year-1+cash_buffer_years].sum()
+        desired_cash_buffer = income_schedule['desired_income'][current_year:current_year+cash_buffer_years].sum()
         return(desired_cash_buffer)
 
     def __initialise_portfolio(
@@ -214,14 +219,15 @@ class Simulation():
         runs simulation
         """
         for i in range(len(self.__income_schedule)):
-            self.run_timestep(i)
+            self._run_timestep(i)
 
-    def run_timestep(self,timestep_number):
+    def _run_timestep(self,timestep_number):
         """
         runs a single time step of the simulation
 
         instrument prices update first, then strategy is executed
         """
+        self.__allowance = 0
         self.update_prices(timestep_number)
         self.execute_strategy(timestep_number)
         self.log_results()
@@ -240,6 +246,8 @@ class Simulation():
         """
 
         desired_allowance = self._get_desired_allowance(timestep_number)
+        min_income = self._get_min_income(timestep_number)
+        withdrawal_limit = self._get_withdrawal_limit()
         
         pass
 
@@ -272,6 +280,71 @@ class Simulation():
         """
 
         return(self.__income_schedule.iloc[timestep]['min_income'])
+    
+    def _get_withdrawal_limit(self):
+        """
+        get withdrawal limit at current point in time based on
+        portfolio value and max_withdrawal_rate
+
+        Returns:
+            withdrawal_limit: float
+                withdrawal limit at current point in time
+        """
+        return(self.get_max_withdrawal_rate() * sum(self.get_portfolio().values()))
+
+    def _check_desired_less_than_max_withdrawal(self,desired_allowance,withdrawal_limit):
+        """
+        checks if desired allowance is less than max withdarwal limit
+        returns True if yes, False if No
+        """
+        return(desired_allowance <= withdrawal_limit)
+
+    def _check_remaining_withdrawal_amount_more_than_empty_buffer(self,desired_buffer,current_buffer,withdrawal_limit,consumed_withdrawal):
+        """
+        checks if withdrawal amount after allowance withdrawal enough to fill empty buffer
+        returns True if yes, False if No
+        """
+        pass
+
+    def __top_up_cash_buffer_from_portfolio(self,amount):
+        """
+        top up cash buffer from portfolio
+        """
+        # subtract amount from portfolio cash portion
+        # add amount to cash buffer
+        pass
+    
+    def _withdraw_allowance_from_portfolio(self,amount):
+        """
+        withdraw money from portfolio and add to allowance
+        """
+        # subtract amount from portfolio cash portion
+        # add amount to allowance
+        pass
+
+    def _withdraw_allowance_from_cash_buffer(self,amount):
+        """
+        withdraw money from cash buffer and add to allowance
+        """
+        # subtract amount from cash_buffer
+        # add amount to allowance
+        pass
+
+    def _check_cash_buffer_enough_funds_for_allowance(self,cash_buffer,desired_allowance):
+        """
+        check if cash buffer has enough funds for desired income
+        return True if yes, False if no
+        """
+        pass
+
+    def _check_max_withdrawal_allow_top_up_to_target_income(self,withdrawal_limit,target_allowance,current_allowance):
+        """
+        check if max withdrawal amount has sufficient value to top up current allowance to desired/minimum allowance
+        return True if yes, False if no
+        """
+        pass
+
+
 
     def log_results(self):
         """
