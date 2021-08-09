@@ -186,3 +186,75 @@ def test_check_remaining_withdrawal_amount_can_refill_buffer():
     assert x._check_remaining_withdrawal_amount_can_refill_buffer(4,3,2,1) == True
     assert x._check_remaining_withdrawal_amount_can_refill_buffer(4,3,2,0) == True
     assert x._check_remaining_withdrawal_amount_can_refill_buffer(4,3,2,2) == False
+
+def test_check_cash_buffer_enough_funds_for_allowance():
+    """
+    ensure that _check_cash_buffer_enough_funds_for_allowance
+    correctly assesses whether cash buffer has enough funds for 
+    to supply desired_allowance
+    """       
+
+    simulation_config = {
+        "starting_portfolio_value" : 1202,
+        "max_withdrawal_rate" : 0.99,
+        "income_schedule" : pd.DataFrame(data={
+            'year':pd.Series([1,2,3], dtype='int'),
+            'desired_income':pd.Series([100,102,104], dtype='float'),
+            'min_income':pd.Series([50,51,52], dtype='float')
+            }),
+        "historical_data_subset": pd.DataFrame(data={
+            'year':pd.Series([1,2,3], dtype='int'),
+            'month':pd.Series([1,2,3], dtype='float'),
+            'gold':pd.Series([5,10,20], dtype='float'),
+            'stocks':pd.Series([10,20,40], dtype='float'),
+            'bonds':pd.Series([50,100,200], dtype='float')
+            }),
+        "portfolio_allocation" : {
+            'stocks' : 1,
+            'gold' : 1,
+            'bonds' : 1,
+            'cash' : 1
+            },
+        "cash_buffer_years" : 2
+        }
+
+    x = ps.Simulation(**simulation_config)
+    assert x._check_cash_buffer_enough_funds_for_allowance(4,3) == True
+    assert x._check_cash_buffer_enough_funds_for_allowance(4,4) == True
+    assert x._check_cash_buffer_enough_funds_for_allowance(3,4) == False
+
+def test_check_max_withdrawal_allow_top_up_to_target_income():
+    """
+    ensure that _check_max_withdrawal_allow_top_up_to_target_income
+    correctly assesses whether withdrawal limit has enough funds for 
+    to supply target allowance
+    """       
+
+    simulation_config = {
+        "starting_portfolio_value" : 1202,
+        "max_withdrawal_rate" : 0.99,
+        "income_schedule" : pd.DataFrame(data={
+            'year':pd.Series([1,2,3], dtype='int'),
+            'desired_income':pd.Series([100,102,104], dtype='float'),
+            'min_income':pd.Series([50,51,52], dtype='float')
+            }),
+        "historical_data_subset": pd.DataFrame(data={
+            'year':pd.Series([1,2,3], dtype='int'),
+            'month':pd.Series([1,2,3], dtype='float'),
+            'gold':pd.Series([5,10,20], dtype='float'),
+            'stocks':pd.Series([10,20,40], dtype='float'),
+            'bonds':pd.Series([50,100,200], dtype='float')
+            }),
+        "portfolio_allocation" : {
+            'stocks' : 1,
+            'gold' : 1,
+            'bonds' : 1,
+            'cash' : 1
+            },
+        "cash_buffer_years" : 2
+        }
+
+    x = ps.Simulation(**simulation_config)
+    assert x._check_max_withdrawal_allow_top_up_to_target_income(2,2,1) == True
+    assert x._check_max_withdrawal_allow_top_up_to_target_income(2,3,1) == True
+    assert x._check_max_withdrawal_allow_top_up_to_target_income(2,4,1) == False

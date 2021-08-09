@@ -338,14 +338,14 @@ class Simulation():
         check if cash buffer has enough funds for desired income
         return True if yes, False if no
         """
-        pass
+        return(cash_buffer >= desired_allowance)
 
     def _check_max_withdrawal_allow_top_up_to_target_income(self,withdrawal_limit,target_allowance,current_allowance):
         """
         check if max withdrawal amount has sufficient value to top up current allowance to desired/minimum allowance
         return True if yes, False if no
         """
-        pass
+        return(withdrawal_limit >= target_allowance - current_allowance)
 
 
 
