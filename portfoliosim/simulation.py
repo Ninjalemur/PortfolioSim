@@ -312,7 +312,8 @@ class Simulation():
         """
         # subtract amount from portfolio cash portion
         # add amount to cash buffer
-        pass
+        self.__portfolio -= amount
+        self.__cash_buffer += amount
     
     def _withdraw_allowance_from_portfolio(self,amount):
         """
