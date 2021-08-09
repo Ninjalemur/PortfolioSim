@@ -299,12 +299,12 @@ class Simulation():
         """
         return(desired_allowance <= withdrawal_limit)
 
-    def _check_remaining_withdrawal_amount_more_than_empty_buffer(self,desired_buffer,current_buffer,withdrawal_limit,consumed_withdrawal):
+    def _check_remaining_withdrawal_amount_can_refill_buffer(self,desired_buffer,current_buffer,withdrawal_limit,consumed_withdrawal):
         """
         checks if withdrawal amount after allowance withdrawal enough to fill empty buffer
         returns True if yes, False if No
         """
-        pass
+        return(desired_buffer - current_buffer <= withdrawal_limit - consumed_withdrawal)
 
     def __top_up_cash_buffer_from_portfolio(self,amount):
         """
