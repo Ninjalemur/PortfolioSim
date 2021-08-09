@@ -12,7 +12,7 @@ def test_simulation_portfolio_cash_buffer_initialisation():
         "max_withdrawal_rate" : 0.99,
         "income_schedule" : pd.DataFrame(data={
             'year':pd.Series([1,2,3], dtype='int'),
-            'desired_income':pd.Series([98,100,102], dtype='float'),
+            'desired_income':pd.Series([100,102,104], dtype='float'),
             'min_income':pd.Series([50,51,52], dtype='float')
             }),
         "historical_data_subset": pd.DataFrame(data={

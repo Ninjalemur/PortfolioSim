@@ -147,7 +147,7 @@ class Simulation():
         desired_cash_buffer = self.__get_desired_cash_buffer(
             income_schedule,
             cash_buffer_years,
-            1)
+            0)
         
         if desired_cash_buffer <= starting_portfolio_value:
             self.__cash_buffer=desired_cash_buffer
