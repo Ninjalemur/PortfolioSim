@@ -493,3 +493,37 @@ def test_execute_logic_06():
     assert round(x._get_portfolio_value(),3) == 99
     assert x.get_cash_buffer() == 0
     assert x.get_allowance() == 1
+
+def test_fail_status():
+    """
+    test failure status when portfolio value drops to zero or less
+    """       
+
+    simulation_config = {
+        "starting_portfolio_value" : 105,
+        "max_withdrawal_rate" : 1,
+        "income_schedule" : pd.DataFrame(data={
+            'year':pd.Series([1,2,3], dtype='int'),
+            'desired_income':pd.Series([200,200,200], dtype='float'),
+            'min_income':pd.Series([200,200,200], dtype='float')
+            }),
+        "historical_data_subset": pd.DataFrame(data={
+            'year':pd.Series([1,2,3], dtype='int'),
+            'month':pd.Series([1,1,1], dtype='float'),
+            'gold':pd.Series([1,1,1], dtype='float'),
+            'stocks':pd.Series([1,1,1], dtype='float'),
+            'bonds':pd.Series([1,1,1], dtype='float')
+            }),
+        "portfolio_allocation" : {
+            'stocks' : 1,
+            'gold' : 1,
+            'bonds' : 1,
+            'cash' : 1
+            },
+        "cash_buffer_years" : 0
+        }
+
+    x = ps.Simulation(**simulation_config)
+    assert x.get_failed_status() == False
+    x._run_timestep(0)
+    assert x.get_failed_status() == True

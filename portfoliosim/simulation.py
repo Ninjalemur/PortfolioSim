@@ -144,6 +144,9 @@ class Simulation():
 
     def get_cash_buffer_years(self):
         return(self.__cash_buffer_years)
+    
+    def get_failed_status(self):
+        return(self.__failed)
 
     def __initialise_cash_buffer(
         self,
@@ -318,6 +321,9 @@ class Simulation():
                     min_allowance - self.get_allowance()
                     )
         self.allocate_portfolio(self.__portfolio_allocation,self.__current_prices)
+
+        if self._get_portfolio_value() <= 0:
+            self.__failed = True
             
 
     def _get_desired_allowance(self,timestep):
@@ -351,6 +357,10 @@ class Simulation():
         return(self.__income_schedule.iloc[timestep]['min_income'])
     
     def _get_portfolio_value(self):
+        """
+        retrieve the current value of the portfolio based on holdings
+        in self.__portfolio and prices in self.__current_prices
+        """
         portfolio_value = 0.0
         for key,value in self.get_portfolio().items():
             portfolio_value += self.__current_prices.get(key,1) * value
