@@ -249,6 +249,8 @@ class Simulation():
         self.__allowance = 0
         self.update_prices(timestep_number)
         self.execute_strategy(timestep_number)
+        if self._get_portfolio_value() <= 0:
+            self.__failed = True
         self.log_results()
     
     def update_prices(self,timestep_number):
