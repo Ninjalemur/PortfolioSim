@@ -361,10 +361,7 @@ class Simulation():
         retrieve the current value of the portfolio based on holdings
         in self.__portfolio and prices in self.__current_prices
         """
-        portfolio_value = 0.0
-        for key,value in self.get_portfolio().items():
-            portfolio_value += self.__current_prices.get(key,1) * value
-        return(portfolio_value)
+        return(sum([self.__current_prices.get(key,1) * value for key,value in self.get_portfolio().items()]))
 
     def _get_withdrawal_limit(self):
         """
