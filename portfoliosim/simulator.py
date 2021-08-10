@@ -9,10 +9,10 @@ class Simulator():
     def __init__(
         self,
         starting_portfolio_value,
-        desired_annual_income,
-        inflation,
-        min_income_multiplier=0.5,
-        max_withdrawal_rate=0.02,
+        desired_annual_income=999999999,
+        inflation=1,
+        min_income_multiplier=1,
+        max_withdrawal_rate=1.0,
         historical_data_source='stock-data/us.csv',
         simulation_length_years=50,
         portfolio_allocation={
