@@ -292,9 +292,9 @@ class Simulator():
         
         # get different time frames
         simulation_time_frames = self._generate_simulation_time_frames(historical_data,simulation_length_years)
-
+        
         for historical_data_subset in simulation_time_frames:
-            pass
+            
             #       initialise simulation
             sim = Simulation(
                 starting_portfolio_value,
@@ -305,10 +305,10 @@ class Simulator():
                 cash_buffer_years
                 )
             #       run simulation
+            sim.run()
+            
             #       extract simulation results and append to simulator results
-
-        pass
-
+       
     def _generate_simulation_time_frames(self,historical_data,simulation_length_years):
         """
         generate time frames to use for simulations
