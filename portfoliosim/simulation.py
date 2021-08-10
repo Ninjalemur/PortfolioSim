@@ -70,6 +70,7 @@ class Simulation():
         self.__income_schedule = income_schedule
         self.__max_withdrawal_rate = max_withdrawal_rate
         self.__income_schedule = income_schedule
+        self.__current_prices = income_schedule.iloc[0]
         self.__portfolio_allocation = portfolio_allocation
         self.__cash_buffer_years = cash_buffer_years
         self.__allowance = 0
@@ -137,6 +138,12 @@ class Simulation():
 
     def get_max_withdrawal_rate(self):
         return(self.__max_withdrawal_rate)
+    
+    def get_income_schedule(self):
+        return(self.__income_schedule)
+
+    def get_cash_buffer_years(self):
+        return(self.__cash_buffer_years)
 
     def __initialise_cash_buffer(
         self,
@@ -214,7 +221,7 @@ class Simulation():
         allocate portfolio based on desired allocation and current prices
         """
 
-        value_to_allocate = sum(self.__portfolio.values())
+        value_to_allocate = self._get_portfolio_value()
 
         for asset,value in self.__portfolio.items():
             asset_price = current_prices.get(asset,1)
@@ -253,12 +260,65 @@ class Simulation():
         executes strategy.
         rebalancing and withdrawals happen here
         """
-
+        
         desired_allowance = self._get_desired_allowance(timestep_number)
-        min_income = self._get_min_income(timestep_number)
+        min_allowance = self._get_min_income(timestep_number)
         withdrawal_limit = self._get_withdrawal_limit()
         
-        pass
+        if desired_allowance <= withdrawal_limit:
+            self._withdraw_allowance_from_portfolio(desired_allowance)
+            if self._check_remaining_withdrawal_amount_can_refill_buffer(
+                    self.__get_desired_cash_buffer(
+                        self.get_income_schedule(),
+                        self.get_cash_buffer_years(),
+                        timestep_number
+                        ),
+                    self.get_cash_buffer(),
+                    withdrawal_limit,
+                    desired_allowance
+                    ) == True:
+                # outcome 01
+                self.__top_up_cash_buffer_from_portfolio(
+                    self.__get_desired_cash_buffer(
+                        self.get_income_schedule(),
+                        self.get_cash_buffer_years(),
+                        timestep_number
+                        ) 
+                        - self.get_cash_buffer()
+                    )
+            else:
+                # outcome 02
+                self.__top_up_cash_buffer_from_portfolio(
+                    withdrawal_limit - desired_allowance
+                    )
+        elif self.get_cash_buffer() >= desired_allowance:
+            # outcome 03
+            self._withdraw_allowance_from_cash_buffer(desired_allowance)
+        else:
+            self._withdraw_allowance_from_cash_buffer(self.get_cash_buffer())
+            if self._check_max_withdrawal_allow_top_up_to_target_income(
+                    withdrawal_limit,
+                    desired_allowance,
+                    self.get_allowance()
+                    ):
+                # outcome 04
+                self._withdraw_allowance_from_portfolio(
+                    desired_allowance - self.get_allowance()
+                    )
+            elif self._check_max_withdrawal_allow_top_up_to_target_income(
+                    withdrawal_limit,
+                    min_allowance,
+                    self.get_allowance()
+                    ):
+                # outcome 05
+                self._withdraw_allowance_from_portfolio(withdrawal_limit)
+            else:
+                # outcome 06
+                self._withdraw_allowance_from_portfolio(
+                    min_allowance - self.get_allowance()
+                    )
+        self.allocate_portfolio(self.__portfolio_allocation,self.__current_prices)
+            
 
     def _get_desired_allowance(self,timestep):
         """
@@ -290,6 +350,12 @@ class Simulation():
 
         return(self.__income_schedule.iloc[timestep]['min_income'])
     
+    def _get_portfolio_value(self):
+        portfolio_value = 0.0
+        for key,value in self.get_portfolio().items():
+            portfolio_value += self.__current_prices.get(key,1) * value
+        return(portfolio_value)
+
     def _get_withdrawal_limit(self):
         """
         get withdrawal limit at current point in time based on
@@ -299,7 +365,8 @@ class Simulation():
             withdrawal_limit: float
                 withdrawal limit at current point in time
         """
-        return(self.get_max_withdrawal_rate() * sum(self.get_portfolio().values()))
+
+        return(self.get_max_withdrawal_rate() * self._get_portfolio_value())
 
     def _check_desired_less_than_max_withdrawal(self,desired_allowance,withdrawal_limit):
         """
@@ -321,7 +388,7 @@ class Simulation():
         """
         # subtract amount from portfolio cash portion
         # add amount to cash buffer
-        self.__portfolio -= amount
+        self.__portfolio['cash'] -= amount
         self.__cash_buffer += amount
     
     def _withdraw_allowance_from_portfolio(self,amount):
@@ -330,7 +397,7 @@ class Simulation():
         """
         # subtract amount from portfolio cash portion
         # add amount to allowance
-        self.__portfolio -= amount
+        self.__portfolio['cash'] -= amount
         self.__allowance += amount
 
     def _withdraw_allowance_from_cash_buffer(self,amount):
