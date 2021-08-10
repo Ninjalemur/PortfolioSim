@@ -184,6 +184,9 @@ class Simulator():
             data frame of historical data
         """
         historical_data = pd.read_csv(historical_data_source)
+        for column in historical_data.columns:
+            if column not in ['year','month']:
+                historical_data[column] = pd.to_numeric(historical_data[column])
         return(historical_data)
 
     def __create_income_schedule(
