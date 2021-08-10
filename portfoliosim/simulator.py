@@ -293,8 +293,9 @@ class Simulator():
         # get different time frames
         simulation_time_frames = self._generate_simulation_time_frames(historical_data,simulation_length_years)
         
-        for historical_data_subset in simulation_time_frames:
-            
+        for i,historical_data_subset in enumerate(simulation_time_frames):
+            if (i+1)%100 == 0:
+                print(f'running simulation {i+1} of {len(simulation_time_frames)}')
             #       initialise simulation
             sim = Simulation(
                 starting_portfolio_value,
