@@ -51,6 +51,67 @@ def test_timestep_log_results():
     x._run_timestep(0)
     pd.testing.assert_frame_equal(x.get_timestep_data(),expected_timestep_data)
 
+def test_get_survival_duration():
+    """
+    test get_survival_duration returns correct survival duration
+    """       
+
+    simulation_config = {
+        "starting_portfolio_value" : 100,
+        "max_withdrawal_rate" : 0.1,
+        "income_schedule" : pd.DataFrame(data={
+            'year':pd.Series([1,2], dtype='int'),
+            'desired_income':pd.Series([99,99], dtype='float'),
+            'min_income':pd.Series([99,99], dtype='float')
+            }),
+        "historical_data_subset": pd.DataFrame(data={
+            'year':pd.Series([1,2,3], dtype='int'),
+            'month':pd.Series([1,1,1], dtype='float'),
+            'gold':pd.Series([1,1,1], dtype='float'),
+            'stocks':pd.Series([1,1,1], dtype='float'),
+            'bonds':pd.Series([1,1,1], dtype='float')
+            }),
+        "portfolio_allocation" : {
+            'stocks' : 1,
+            'gold' : 1,
+            'bonds' : 1,
+            'cash' : 1
+            },
+        "cash_buffer_years" : 0
+        }
+
+    x = ps.Simulation(**simulation_config)
+    x.run()
+    assert x.get_survival_duration() == 1
+
+    simulation_config2 = {
+        "starting_portfolio_value" : 100,
+        "max_withdrawal_rate" : 0.1,
+        "income_schedule" : pd.DataFrame(data={
+            'year':pd.Series([1,2], dtype='int'),
+            'desired_income':pd.Series([1,1], dtype='float'),
+            'min_income':pd.Series([1,1], dtype='float')
+            }),
+        "historical_data_subset": pd.DataFrame(data={
+            'year':pd.Series([1,2,3], dtype='int'),
+            'month':pd.Series([1,1,1], dtype='float'),
+            'gold':pd.Series([1,1,1], dtype='float'),
+            'stocks':pd.Series([1,1,1], dtype='float'),
+            'bonds':pd.Series([1,1,1], dtype='float')
+            }),
+        "portfolio_allocation" : {
+            'stocks' : 1,
+            'gold' : 1,
+            'bonds' : 1,
+            'cash' : 1
+            },
+        "cash_buffer_years" : 0
+        }
+
+    y = ps.Simulation(**simulation_config2)
+    y.run()
+    assert y.get_survival_duration() == 2
+
 def test_run_results_generation():
     """
     test log_results during simulation run
@@ -91,4 +152,4 @@ def test_run_results_generation():
 
     x = ps.Simulation(**simulation_config)
     run_data, timestep_data = x.run()
-    pd.testing.assert_frame_equal(timestep_data,expected_run_data)
+    pd.testing.assert_frame_equal(run_data,expected_run_data)

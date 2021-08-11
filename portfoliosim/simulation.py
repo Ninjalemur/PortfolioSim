@@ -255,10 +255,17 @@ class Simulation():
             'end_ref_year':pd.Series([self.get_historical_data().iloc[-1]['year']], dtype='int'),
             'end_ref_month':pd.Series([self.get_historical_data().iloc[-1]['month']], dtype='int'),
             'final_value':pd.Series([self._get_portfolio_value() + self.get_cash_buffer()], dtype='float'), # both portfolio and cash buffer
-            'survival_duration':pd.Series([24], dtype='int')
+            'survival_duration':pd.Series([self.get_survival_duration()], dtype='int')
             })
         
         return(run_results,self.get_timestep_data())
+
+    def get_survival_duration(self):
+        df = self.get_timestep_data()
+        if df[df['failed']==True].empty:
+            return(len(df))
+        else:
+            return(df[df['failed']==True].index[0])
 
     def _run_timestep(self,timestep_number):
         """
