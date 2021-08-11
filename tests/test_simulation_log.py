@@ -2,13 +2,9 @@ import portfoliosim as ps
 import pandas as pd
 
 
-def test_execute_logic_01():
+def test_log_results():
     """
-    test exucute logic to execute logic outcome 01
-        - desired allowance is less than max withdrawal
-        - full amount withdrawn from portfolio
-        - amount from max withdrawal not utilised by allowance 
-            tops up cash buffer fully
+    test log_results during simulation run
     """       
 
     simulation_config = {
