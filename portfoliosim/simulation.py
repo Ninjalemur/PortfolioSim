@@ -49,7 +49,7 @@ class Simulation():
         
         """
         # create empty container to store results
-        run_timestep_data = pd.DataFrame({
+        self.__run_timestep_data = pd.DataFrame({
             'year':pd.Series([], dtype='int'),
             'cash_buffer':pd.Series([], dtype='float'),
             'bonds_qty':pd.Series([], dtype='float'),
@@ -59,7 +59,7 @@ class Simulation():
             'stocks_value':pd.Series([], dtype='float'),
             'gold_value':pd.Series([], dtype='float'),
             'cash_notional':pd.Series([], dtype='float'),
-            'withdrawal':pd.Series([], dtype='float'),
+            'allowance':pd.Series([], dtype='float'),
             })
 
         # normalise portfolio_allocation so that they total up to 1
@@ -147,6 +147,9 @@ class Simulation():
     
     def get_failed_status(self):
         return(self.__failed)
+    
+    def get_timestep_data(self):
+        return(self.__run_timestep_data)
 
     def __initialise_cash_buffer(
         self,
@@ -432,10 +435,8 @@ class Simulation():
         """
         return(withdrawal_limit >= target_allowance - current_allowance)
 
-
-
     def log_results(self):
         """
-        logs results to container
+        logs results to data frame
         """
         pass
