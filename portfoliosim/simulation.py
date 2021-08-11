@@ -61,7 +61,8 @@ class Simulation():
             'stocks_value':pd.Series([], dtype='float'),
             'gold_value':pd.Series([], dtype='float'),
             'cash_notional':pd.Series([], dtype='float'),
-            'allowance':pd.Series([], dtype='float')
+            'allowance':pd.Series([], dtype='float'),
+            'failed':pd.Series([], dtype='boolean')
             })
 
         # normalise portfolio_allocation so that they total up to 1
@@ -152,6 +153,9 @@ class Simulation():
     
     def get_timestep_data(self):
         return(self.__run_timestep_data)
+
+    def get_historical_data(self):
+        return(self.__historical_data_subset)
 
     def __initialise_cash_buffer(
         self,
@@ -245,22 +249,15 @@ class Simulation():
         for i in range(len(self.__income_schedule)):
             self._run_timestep(i)
         
-        # run_results = pd.DataFrame({
-        #     'start_ref_year':pd.Series([1], dtype='int'),
-        #     'start_ref_month':pd.Series([1], dtype='int'),
-        #     'end_ref_year':pd.Series([1], dtype='int'),
-        #     'end_ref_month':pd.Series([1], dtype='int'),
-        #     'final_value':pd.Series([0.0], dtype='float'), # both portfolio and cash buffer
-        #     'bonds_qty':pd.Series([24.75], dtype='float'),
-        #     'stocks_qty':pd.Series([24.75], dtype='float'),
-        #     'gold_qty':pd.Series([24.75], dtype='float'),
-        #     'bonds_value':pd.Series([24.75], dtype='float'),
-        #     'stocks_value':pd.Series([24.75], dtype='float'),
-        #     'gold_value':pd.Series([24.75], dtype='float'),
-        #     'cash_notional':pd.Series([24.75], dtype='float'),
-        #     'allowance':pd.Series([1], dtype='float'),
-        #     })
-
+        run_results = pd.DataFrame({
+            'start_ref_year':pd.Series([self.get_historical_data().iloc[0]['year']], dtype='int'),
+            'start_ref_month':pd.Series([self.get_historical_data().iloc[0]['month']], dtype='int'),
+            'end_ref_year':pd.Series([self.get_historical_data().iloc[-1]['year']], dtype='int'),
+            'end_ref_month':pd.Series([self.get_historical_data().iloc[-1]['month']], dtype='int'),
+            'final_value':pd.Series([self._get_portfolio_value() + self.get_cash_buffer()], dtype='float'), # both portfolio and cash buffer
+            'survival_duration':pd.Series([24], dtype='int')
+            })
+        
         return(run_results,self.get_timestep_data())
 
     def _run_timestep(self,timestep_number):
@@ -474,7 +471,8 @@ class Simulation():
                 'stocks_value':pd.Series([self.get_portfolio()['stocks'] * self.get_current_prices()['stocks']], dtype='float'),
                 'gold_value':pd.Series([self.get_portfolio()['gold'] * self.get_current_prices()['gold']], dtype='float'),
                 'cash_notional':pd.Series([self.get_portfolio()['cash']], dtype='float'),
-                'allowance':pd.Series([self.get_allowance()], dtype='float')
+                'allowance':pd.Series([self.get_allowance()], dtype='float'),
+                'failed':pd.Series([self.get_failed_status()], dtype='boolean')
                 }),
             ignore_index=True
             )
