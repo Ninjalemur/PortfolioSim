@@ -50,7 +50,9 @@ class Simulation():
         """
         # create empty container to store results
         self.__run_timestep_data = pd.DataFrame({
+            'timestep':pd.Series([], dtype='int'),
             'year':pd.Series([], dtype='int'),
+            'month':pd.Series([], dtype='int'),
             'cash_buffer':pd.Series([], dtype='float'),
             'bonds_qty':pd.Series([], dtype='float'),
             'stocks_qty':pd.Series([], dtype='float'),
@@ -254,7 +256,7 @@ class Simulation():
         self.execute_strategy(timestep_number)
         if self._get_portfolio_value() <= 0:
             self.__failed = True
-        self.log_results()
+        self.log_results(timestep_number)
     
     def update_prices(self,timestep_number):
         """
@@ -435,8 +437,25 @@ class Simulation():
         """
         return(withdrawal_limit >= target_allowance - current_allowance)
 
-    def log_results(self):
+    def log_results(self,timestep):
         """
         logs results to data frame
         """
-        pass
+        self.__run_timestep_data = self.__run_timestep_data.append(
+            pd.DataFrame({
+                'timestep':pd.Series([timestep+1], dtype='int'),
+                'year':pd.Series([self.get_current_prices()['year']], dtype='int'),
+                'month':pd.Series([self.get_current_prices()['month']], dtype='int'),
+                'cash_buffer':pd.Series([self.get_cash_buffer()], dtype='float'),
+                'bonds_qty':pd.Series([self.get_portfolio()['bonds']], dtype='float'),
+                'stocks_qty':pd.Series([self.get_portfolio()['stocks']], dtype='float'),
+                'gold_qty':pd.Series([self.get_portfolio()['gold']], dtype='float'),
+                'bonds_value':pd.Series([self.get_portfolio()['bonds'] * self.get_current_prices()['bonds']], dtype='float'),
+                'stocks_value':pd.Series([self.get_portfolio()['stocks'] * self.get_current_prices()['stocks']], dtype='float'),
+                'gold_value':pd.Series([self.get_portfolio()['gold'] * self.get_current_prices()['gold']], dtype='float'),
+                'cash_notional':pd.Series([self.get_portfolio()['cash']], dtype='float'),
+                'allowance':pd.Series([self.get_allowance()], dtype='float'),
+                }),
+            ignore_index=True
+            )
+        
