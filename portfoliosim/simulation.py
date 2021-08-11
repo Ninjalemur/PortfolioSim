@@ -61,7 +61,7 @@ class Simulation():
             'stocks_value':pd.Series([], dtype='float'),
             'gold_value':pd.Series([], dtype='float'),
             'cash_notional':pd.Series([], dtype='float'),
-            'allowance':pd.Series([], dtype='float'),
+            'allowance':pd.Series([], dtype='float')
             })
 
         # normalise portfolio_allocation so that they total up to 1
@@ -238,10 +238,30 @@ class Simulation():
 
     def run(self):
         """
-        runs simulation
+        runs simulation, 
+        
+        returns run_results, timestep_results
         """
         for i in range(len(self.__income_schedule)):
             self._run_timestep(i)
+        
+        # run_results = pd.DataFrame({
+        #     'start_ref_year':pd.Series([1], dtype='int'),
+        #     'start_ref_month':pd.Series([1], dtype='int'),
+        #     'end_ref_year':pd.Series([1], dtype='int'),
+        #     'end_ref_month':pd.Series([1], dtype='int'),
+        #     'final_value':pd.Series([0.0], dtype='float'), # both portfolio and cash buffer
+        #     'bonds_qty':pd.Series([24.75], dtype='float'),
+        #     'stocks_qty':pd.Series([24.75], dtype='float'),
+        #     'gold_qty':pd.Series([24.75], dtype='float'),
+        #     'bonds_value':pd.Series([24.75], dtype='float'),
+        #     'stocks_value':pd.Series([24.75], dtype='float'),
+        #     'gold_value':pd.Series([24.75], dtype='float'),
+        #     'cash_notional':pd.Series([24.75], dtype='float'),
+        #     'allowance':pd.Series([1], dtype='float'),
+        #     })
+
+        return(run_results,self.get_timestep_data())
 
     def _run_timestep(self,timestep_number):
         """
@@ -454,7 +474,7 @@ class Simulation():
                 'stocks_value':pd.Series([self.get_portfolio()['stocks'] * self.get_current_prices()['stocks']], dtype='float'),
                 'gold_value':pd.Series([self.get_portfolio()['gold'] * self.get_current_prices()['gold']], dtype='float'),
                 'cash_notional':pd.Series([self.get_portfolio()['cash']], dtype='float'),
-                'allowance':pd.Series([self.get_allowance()], dtype='float'),
+                'allowance':pd.Series([self.get_allowance()], dtype='float')
                 }),
             ignore_index=True
             )
