@@ -138,6 +138,7 @@ class Simulator():
             'gold_value':pd.Series([], dtype='float'),
             'cash_notional':pd.Series([], dtype='float'),
             'allowance':pd.Series([], dtype='float'),
+            'desired_allowance':pd.Series([], dtype='float'),
             'failed':pd.Series([], dtype='boolean')
             })
 

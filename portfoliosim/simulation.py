@@ -63,6 +63,7 @@ class Simulation():
             'gold_value':pd.Series([], dtype='float'),
             'cash_notional':pd.Series([], dtype='float'),
             'allowance':pd.Series([], dtype='float'),
+            'desired_allowance':pd.Series([], dtype='float'),
             'failed':pd.Series([], dtype='boolean')
             })
 
@@ -470,7 +471,7 @@ class Simulation():
 
     def log_results(self,timestep):
         """
-        logs results to data frame
+        logs results to timestep_data
         """
         self.__run_timestep_data = self.__run_timestep_data.append(
             pd.DataFrame({
@@ -486,6 +487,7 @@ class Simulation():
                 'gold_value':pd.Series([self.get_portfolio()['gold'] * self.get_current_prices()['gold']], dtype='float'),
                 'cash_notional':pd.Series([self.get_portfolio()['cash']], dtype='float'),
                 'allowance':pd.Series([self.get_allowance()], dtype='float'),
+                'desired_allowance':pd.Series([self._get_desired_allowance(timestep)], dtype='float'),
                 'failed':pd.Series([self.get_failed_status()], dtype='boolean')
                 }),
             ignore_index=True

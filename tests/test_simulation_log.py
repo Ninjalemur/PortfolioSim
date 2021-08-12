@@ -44,6 +44,7 @@ def test_timestep_log_results():
             'gold_value':pd.Series([24.75], dtype='float'),
             'cash_notional':pd.Series([24.75], dtype='float'),
             'allowance':pd.Series([1], dtype='float'),
+            'desired_allowance':pd.Series([1], dtype='float'),
             'failed':pd.Series([False], dtype='boolean')
             })
 
