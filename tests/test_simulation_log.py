@@ -152,4 +152,49 @@ def test_run_results_generation():
 
     x = ps.Simulation(**simulation_config)
     run_data, timestep_data = x.run()
+    run_data = run_data.drop(columns=['run_id']) #drop randomised run_id column
     pd.testing.assert_frame_equal(run_data,expected_run_data)
+
+def test_run_id_labelling():
+    """
+    test that run_data, timestep_data have same run_id attached to them
+    """       
+
+    simulation_config = {
+        "starting_portfolio_value" : 100,
+        "max_withdrawal_rate" : 0.1,
+        "income_schedule" : pd.DataFrame(data={
+            'year':pd.Series([1,2], dtype='int'),
+            'desired_income':pd.Series([1,1], dtype='float'),
+            'min_income':pd.Series([1,1], dtype='float')
+            }),
+        "historical_data_subset": pd.DataFrame(data={
+            'year':pd.Series([1,2], dtype='int'),
+            'month':pd.Series([1,1], dtype='float'),
+            'gold':pd.Series([1,1], dtype='float'),
+            'stocks':pd.Series([1,1], dtype='float'),
+            'bonds':pd.Series([1,1], dtype='float')
+            }),
+        "portfolio_allocation" : {
+            'stocks' : 1,
+            'gold' : 1,
+            'bonds' : 1,
+            'cash' : 1
+            },
+        "cash_buffer_years" : 0
+        }
+
+    expected_run_data = pd.DataFrame({
+            'start_ref_year':pd.Series([1], dtype='int'),
+            'start_ref_month':pd.Series([1], dtype='int'),
+            'end_ref_year':pd.Series([2], dtype='int'),
+            'end_ref_month':pd.Series([1], dtype='int'),
+            'final_value':pd.Series([98.0], dtype='float'),
+            'survival_duration':pd.Series([2], dtype='int')
+            })
+
+    x = ps.Simulation(**simulation_config)
+    run_data, timestep_data = x.run()
+
+    assert list(run_data['run_id'].unique()) == list(timestep_data['run_id'].unique())
+    

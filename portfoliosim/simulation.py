@@ -1,4 +1,5 @@
 import pandas as pd
+import random
 
 class Simulation():
     def __init__(
@@ -257,8 +258,14 @@ class Simulation():
             'final_value':pd.Series([self._get_portfolio_value() + self.get_cash_buffer()], dtype='float'), # both portfolio and cash buffer
             'survival_duration':pd.Series([self.get_survival_duration()], dtype='int')
             })
+
+        # add randomised run id to results
+        run_id = random.randint(10**12, 10**13 - 1)
+        timestep_data = self.get_timestep_data()
+        timestep_data['run_id'] = run_id
+        run_results['run_id'] = run_id
         
-        return(run_results,self.get_timestep_data())
+        return(run_results,timestep_data)
 
     def get_survival_duration(self):
         df = self.get_timestep_data()

@@ -1,5 +1,7 @@
 import pandas as pd
 from .simulation import Simulation
+import pathlib
+import datetime
 
 
 class Simulator():
@@ -55,7 +57,7 @@ class Simulator():
                 Eg 0.02 denotes a desired max withdrawal rate of 2%
 
             historical_data_source: file_path, default 'stock-data/us.csv'
-                file path to historical income data csv
+                file path to historical income data csv, or data frame
                 data should contain 
                     year: year of this row of data (eg 1970)
                     month: month of this row of data (1-12)
@@ -87,6 +89,7 @@ class Simulator():
         self.__check_config_validity(simulation_cofig)
         
         self.__simulation_config = simulation_cofig
+        self.__simulator_id = self._generate_simulator_id()
 
         # needs strategy function to pass to simulations
 
@@ -101,15 +104,42 @@ class Simulator():
             simulation_length_years)
 
         # initialise empty data container to store results
-        self.__results = {
-            'simulator inputs': {
+        self.__simulator_inputs = {
+                'simulator_id': self.__simulator_id,
                 'starting_portfolio_value': starting_portfolio_value,
                 'desired_annual_income': desired_annual_income,
                 'inflation': inflation,
                 'min_income_multiplier': min_income_multiplier,
                 'max_withdrawal_rate': max_withdrawal_rate,
+                'portfolio_allocation': portfolio_allocation
                 }
-        }
+        
+        self.__run_results = pd.DataFrame({
+            'run_id':pd.Series([], dtype='int'),
+            'start_ref_year':pd.Series([], dtype='int'),
+            'start_ref_month':pd.Series([], dtype='int'),
+            'end_ref_year':pd.Series([], dtype='int'),
+            'end_ref_month':pd.Series([], dtype='int'),
+            'final_value':pd.Series([], dtype='float'), 
+            'survival_duration':pd.Series([], dtype='int')
+            })
+        
+        self.__timestep_data = pd.DataFrame({
+            'run_id':pd.Series([], dtype='int'),
+            'timestep':pd.Series([], dtype='int'),
+            'year':pd.Series([], dtype='int'),
+            'month':pd.Series([], dtype='int'),
+            'cash_buffer':pd.Series([], dtype='float'),
+            'bonds_qty':pd.Series([], dtype='float'),
+            'stocks_qty':pd.Series([], dtype='float'),
+            'gold_qty':pd.Series([], dtype='float'),
+            'bonds_value':pd.Series([], dtype='float'),
+            'stocks_value':pd.Series([], dtype='float'),
+            'gold_value':pd.Series([], dtype='float'),
+            'cash_notional':pd.Series([], dtype='float'),
+            'allowance':pd.Series([], dtype='float'),
+            'failed':pd.Series([], dtype='boolean')
+            })
 
     def __check_config_validity(self,simulation_cofig):
         float_fields = ['desired_annual_income', 'inflation', 'min_income_multiplier','starting_portfolio_value','max_withdrawal_rate']
@@ -183,10 +213,13 @@ class Simulator():
         returns:
             data frame of historical data
         """
-        historical_data = pd.read_csv(historical_data_source)
-        for column in historical_data.columns:
-            if column not in ['year','month']:
-                historical_data[column] = pd.to_numeric(historical_data[column])
+        if str(type(historical_data_source)) == "<class 'pandas.core.frame.DataFrame'>":
+            historical_data = historical_data_source
+        else:
+            historical_data = pd.read_csv(historical_data_source)
+            for column in historical_data.columns:
+                if column not in ['year','month']:
+                    historical_data[column] = pd.to_numeric(historical_data[column])
         return(historical_data)
 
     def __create_income_schedule(
@@ -226,9 +259,38 @@ class Simulator():
                 }))
         income_schedule.reset_index(drop=True, inplace=True)
         return(income_schedule)
+    def _generate_simulator_id(self):
+        ct = datetime.datetime.now()
+        ts = ct.timestamp()
+        simulator_id = int(float(ts * 10**6))
+        return(simulator_id)
 
     def _get_income_schedule(self):
         return(self.__income_schedule)
+    def _get_run_results(self):
+        return(self.__run_results)
+    def _get_timestep_data(self):
+        return(self.__timestep_data)
+    def _get_simulator_inputs(self):
+        return(self.__simulator_inputs)
+    def _get_simulator_inputs_df(self):
+        
+        df = pd.DataFrame({
+            'simulator_id':pd.Series([self.__simulator_inputs['simulator_id']], dtype='int64'),
+            'starting_portfolio_value':pd.Series([self.__simulator_inputs['starting_portfolio_value']], dtype='float'),
+            'desired_annual_income':pd.Series([self.__simulator_inputs['desired_annual_income']], dtype='float'),
+            'inflation':pd.Series([self.__simulator_inputs['inflation']], dtype='float'),
+            'min_income_multiplier':pd.Series([self.__simulator_inputs['min_income_multiplier']], dtype='float'),
+            'max_withdrawal_rate':pd.Series([self.__simulator_inputs['max_withdrawal_rate']], dtype='float'),
+            'stocks_allocation':pd.Series([self.__simulator_inputs['portfolio_allocation']['stocks']], dtype='float'),
+            'bonds_allocation':pd.Series([self.__simulator_inputs['portfolio_allocation']['bonds']], dtype='float'),
+            'gold_allocation':pd.Series([self.__simulator_inputs['portfolio_allocation']['gold']], dtype='float'),
+            'cash_allocation':pd.Series([self.__simulator_inputs['portfolio_allocation']['cash']], dtype='float')
+            })
+        
+        return(df)
+    
+    
 
     def run_simulations(self):
         """ 
@@ -306,9 +368,11 @@ class Simulator():
                 cash_buffer_years
                 )
             #       run simulation
-            sim.run()
+            run_results, timestep_data = sim.run()
             
             #       extract simulation results and append to simulator results
+            self.__run_results = self.__run_results.append(run_results)
+            self.__timestep_data = self.__timestep_data.append(timestep_data)
        
     def _generate_simulation_time_frames(self,historical_data,simulation_length_years):
         """
@@ -337,8 +401,24 @@ class Simulator():
 
         return(time_frames_list)
 
-    def read_results(self):
+    def write_results(self,results_directory='./results/'):
         """
-        returns results
+        writes results to folder
         """
-        pass
+        results_folder = results_directory+str(self.__simulator_id)+'/'
+        path = pathlib.Path(results_folder)
+        path.mkdir(parents=True, exist_ok=True)
+
+        run_results = self._get_run_results()
+        run_results.to_csv(results_folder+'run_results.csv',index=False)
+
+        timestep_data = self._get_timestep_data()
+        timestep_data.to_csv(results_folder+'timestep_data.csv',index=False)
+
+        historical_data = self.__historical_data
+        historical_data.to_csv(results_folder+'historical_data.csv',index=False)
+
+        simulation_inputs = self._get_simulator_inputs_df()
+        simulation_inputs.to_csv(results_folder+'simulation_inputs.csv',index=False)
+
+
