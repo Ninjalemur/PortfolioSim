@@ -320,7 +320,7 @@ class Simulation():
                     desired_allowance
                     ) == True:
                 # outcome 01
-                self.__top_up_cash_buffer_from_portfolio(
+                self._top_up_cash_buffer_from_portfolio(
                     self.__get_desired_cash_buffer(
                         self.get_income_schedule(),
                         self.get_cash_buffer_years(),
@@ -330,7 +330,7 @@ class Simulation():
                     )
             else:
                 # outcome 02
-                self.__top_up_cash_buffer_from_portfolio(
+                self._top_up_cash_buffer_from_portfolio(
                     withdrawal_limit - desired_allowance
                     )
         elif self.get_cash_buffer() >= desired_allowance:
@@ -428,7 +428,7 @@ class Simulation():
         """
         return(desired_buffer - current_buffer <= withdrawal_limit - consumed_withdrawal)
 
-    def __top_up_cash_buffer_from_portfolio(self,amount):
+    def _top_up_cash_buffer_from_portfolio(self,amount):
         """
         top up cash buffer from portfolio
         """
