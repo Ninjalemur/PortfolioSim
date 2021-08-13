@@ -527,3 +527,108 @@ def test_fail_status():
     assert x.get_failed_status() == False
     x._run_timestep(0)
     assert x.get_failed_status() == True
+
+def test_top_up_cash_buffer_from_portfolio_limiter():
+    """
+    ensure that top_up_cash_buffer_from_portfolio 
+    does not withdraw more than currently in portfolio
+    """       
+
+    simulation_config = {
+        "starting_portfolio_value" : 1202,
+        "max_withdrawal_rate" : 0.99,
+        "income_schedule" : pd.DataFrame(data={
+            'year':pd.Series([1,2,3], dtype='int'),
+            'desired_income':pd.Series([100,102,104], dtype='float'),
+            'min_income':pd.Series([50,51,52], dtype='float')
+            }),
+        "historical_data_subset": pd.DataFrame(data={
+            'year':pd.Series([1,2,3], dtype='int'),
+            'month':pd.Series([1,2,3], dtype='float'),
+            'gold':pd.Series([5,10,20], dtype='float'),
+            'stocks':pd.Series([10,20,40], dtype='float'),
+            'bonds':pd.Series([50,100,200], dtype='float')
+            }),
+        "portfolio_allocation" : {
+            'stocks' : 1,
+            'gold' : 1,
+            'bonds' : 1,
+            'cash' : 1
+            },
+        "cash_buffer_years" : 2
+        }
+
+    x = ps.Simulation(**simulation_config)
+    x._top_up_cash_buffer_from_portfolio(2000)
+    assert x.get_cash_buffer() == 1202
+    assert x._get_portfolio_value() == 0
+
+def test_withdraw_allowance_from_portfolio_limiter():
+    """
+    ensure that _withdraw_allowance_from_portfolio 
+    does not withdraw more than currently in portfolio
+    """       
+
+    simulation_config = {
+        "starting_portfolio_value" : 1000,
+        "max_withdrawal_rate" : 0.99,
+        "income_schedule" : pd.DataFrame(data={
+            'year':pd.Series([1,2,3], dtype='int'),
+            'desired_income':pd.Series([100,102,104], dtype='float'),
+            'min_income':pd.Series([50,51,52], dtype='float')
+            }),
+        "historical_data_subset": pd.DataFrame(data={
+            'year':pd.Series([1,2,3], dtype='int'),
+            'month':pd.Series([1,2,3], dtype='float'),
+            'gold':pd.Series([5,10,20], dtype='float'),
+            'stocks':pd.Series([10,20,40], dtype='float'),
+            'bonds':pd.Series([50,100,200], dtype='float')
+            }),
+        "portfolio_allocation" : {
+            'stocks' : 1,
+            'gold' : 1,
+            'bonds' : 1,
+            'cash' : 1
+            },
+        "cash_buffer_years" : 0
+        }
+
+    x = ps.Simulation(**simulation_config)
+    x._withdraw_allowance_from_portfolio(2000)
+    assert x.get_allowance() == 1000
+    assert x._get_portfolio_value() == 0
+
+def test_withdraw_allowance_from_cash_buffer_limiter():
+    """
+    ensure that _withdraw_allowance_from_cash_buffer 
+    does not withdraw more than currently in cash_buffer
+    """       
+
+    simulation_config = {
+        "starting_portfolio_value" : 1202,
+        "max_withdrawal_rate" : 0.99,
+        "income_schedule" : pd.DataFrame(data={
+            'year':pd.Series([1,2,3], dtype='int'),
+            'desired_income':pd.Series([100,102,104], dtype='float'),
+            'min_income':pd.Series([50,51,52], dtype='float')
+            }),
+        "historical_data_subset": pd.DataFrame(data={
+            'year':pd.Series([1,2,3], dtype='int'),
+            'month':pd.Series([1,2,3], dtype='float'),
+            'gold':pd.Series([5,10,20], dtype='float'),
+            'stocks':pd.Series([10,20,40], dtype='float'),
+            'bonds':pd.Series([50,100,200], dtype='float')
+            }),
+        "portfolio_allocation" : {
+            'stocks' : 1,
+            'gold' : 1,
+            'bonds' : 1,
+            'cash' : 1
+            },
+        "cash_buffer_years" : 2
+        }
+
+    x = ps.Simulation(**simulation_config)
+    x._withdraw_allowance_from_cash_buffer(2000)
+    assert x.get_cash_buffer() == 0
+    assert x.get_allowance() == 202

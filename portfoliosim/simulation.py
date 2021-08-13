@@ -434,6 +434,9 @@ class Simulation():
         """
         # subtract amount from portfolio cash portion
         # add amount to cash buffer
+        if amount >= self._get_portfolio_value():
+            amount = self._get_portfolio_value()
+
         self.__portfolio['cash'] -= amount
         self.__cash_buffer += amount
     
@@ -442,7 +445,10 @@ class Simulation():
         withdraw money from portfolio and add to allowance
         """
         # subtract amount from portfolio cash portion
-        # add amount to allowance
+        # add amount to allowance        
+        if amount >= self._get_portfolio_value():
+            amount = self._get_portfolio_value()
+
         self.__portfolio['cash'] -= amount
         self.__allowance += amount
 
@@ -452,6 +458,9 @@ class Simulation():
         """
         # subtract amount from cash_buffer
         # add amount to allowance
+        if amount >= self.get_cash_buffer():
+            amount = self.get_cash_buffer()
+
         self.__cash_buffer -= amount
         self.__allowance += amount
 
