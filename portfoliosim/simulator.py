@@ -357,6 +357,9 @@ class Simulator():
         # get different time frames
         simulation_time_frames = self._generate_simulation_time_frames(historical_data,simulation_length_years)
         
+        run_results_list = [] # for use in concatenating data frames later
+        timestep_data_list = [] # for use in concatenating data frames later
+
         bar = progressbar.ProgressBar()
         for i in bar(range(len(simulation_time_frames))):
         # for i,historical_data_subset in enumerate(simulation_time_frames):
@@ -376,8 +379,15 @@ class Simulator():
             run_results, timestep_data = sim.run()
             
             #       extract simulation results and append to simulator results
-            self.__run_results = self.__run_results.append(run_results)
-            self.__timestep_data = self.__timestep_data.append(timestep_data)
+            # self.__run_results = self.__run_results.append(run_results)
+            # self.__timestep_data = self.__timestep_data.append(timestep_data)
+
+            run_results_list.append(run_results)
+            timestep_data_list.append(timestep_data)
+        
+        self.__run_results = pd.concat([self.__run_results]+run_results_list,axis=0,ignore_index=True)
+        self.__timestep_data = pd.concat([self.__timestep_data]+timestep_data_list,axis=0,ignore_index=True)
+
        
     def _generate_simulation_time_frames(self,historical_data,simulation_length_years):
         """
