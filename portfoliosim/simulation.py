@@ -50,22 +50,38 @@ class Simulation():
         
         """
         # create empty container to store results
-        self.__run_timestep_data = pd.DataFrame({
-            'timestep':pd.Series([], dtype='int'),
-            'year':pd.Series([], dtype='int'),
-            'month':pd.Series([], dtype='int'),
-            'cash_buffer':pd.Series([], dtype='float'),
-            'bonds_qty':pd.Series([], dtype='float'),
-            'stocks_qty':pd.Series([], dtype='float'),
-            'gold_qty':pd.Series([], dtype='float'),
-            'bonds_value':pd.Series([], dtype='float'),
-            'stocks_value':pd.Series([], dtype='float'),
-            'gold_value':pd.Series([], dtype='float'),
-            'cash_notional':pd.Series([], dtype='float'),
-            'allowance':pd.Series([], dtype='float'),
-            'desired_allowance':pd.Series([], dtype='float'),
-            'failed':pd.Series([], dtype='boolean')
-            })
+        # self.__run_timestep_data = pd.DataFrame({
+        #     'timestep':pd.Series([], dtype='int'),
+        #     'year':pd.Series([], dtype='int'),
+        #     'month':pd.Series([], dtype='int'),
+        #     'cash_buffer':pd.Series([], dtype='float'),
+        #     'bonds_qty':pd.Series([], dtype='float'),
+        #     'stocks_qty':pd.Series([], dtype='float'),
+        #     'gold_qty':pd.Series([], dtype='float'),
+        #     'bonds_value':pd.Series([], dtype='float'),
+        #     'stocks_value':pd.Series([], dtype='float'),
+        #     'gold_value':pd.Series([], dtype='float'),
+        #     'cash_notional':pd.Series([], dtype='float'),
+        #     'allowance':pd.Series([], dtype='float'),
+        #     'desired_allowance':pd.Series([], dtype='float'),
+        #     'failed':pd.Series([], dtype='boolean')
+        #     })
+        self.__run_timestep_data = {
+            'timestep': [],
+            'year': [],
+            'month': [],
+            'cash_buffer': [],
+            'bonds_qty': [],
+            'stocks_qty': [],
+            'gold_qty': [],
+            'bonds_value': [],
+            'stocks_value': [],
+            'gold_value': [],
+            'cash_notional': [],
+            'allowance': [],
+            'desired_allowance': [],
+            'failed': []
+            }
 
         # normalise portfolio_allocation so that they total up to 1
         portfolio_allocation = self.__normalise_portfolio_allocation(portfolio_allocation)
@@ -263,17 +279,38 @@ class Simulation():
         # add randomised run id to results
         run_id = random.randint(10**12, 10**13 - 1)
         timestep_data = self.get_timestep_data()
+        timestep_data = pd.DataFrame({ ##
+            'timestep':pd.Series(self.__run_timestep_data['timestep'], dtype='int'),
+            'year':pd.Series(self.__run_timestep_data['year'], dtype='int'),
+            'month':pd.Series(self.__run_timestep_data['month'], dtype='int'),
+            'cash_buffer':pd.Series(self.__run_timestep_data['cash_buffer'], dtype='float'),
+            'bonds_qty':pd.Series(self.__run_timestep_data['bonds_qty'], dtype='float'),
+            'stocks_qty':pd.Series(self.__run_timestep_data['stocks_qty'], dtype='float'),
+            'gold_qty':pd.Series(self.__run_timestep_data['gold_qty'], dtype='float'),
+            'bonds_value':pd.Series(self.__run_timestep_data['bonds_value'], dtype='float'),
+            'stocks_value':pd.Series(self.__run_timestep_data['stocks_value'], dtype='float'),
+            'gold_value':pd.Series(self.__run_timestep_data['gold_value'], dtype='float'),
+            'cash_notional':pd.Series(self.__run_timestep_data['cash_notional'], dtype='float'),
+            'allowance':pd.Series(self.__run_timestep_data['allowance'], dtype='float'),
+            'desired_allowance':pd.Series(self.__run_timestep_data['desired_allowance'], dtype='float'),
+            'failed':pd.Series(self.__run_timestep_data['failed'], dtype='boolean')
+            })
         timestep_data['run_id'] = run_id
         run_results['run_id'] = run_id
         
         return(run_results,timestep_data)
 
     def get_survival_duration(self):
-        df = self.get_timestep_data()
-        if df[df['failed']==True].empty:
-            return(len(df))
+        failed_list = self.get_timestep_data()['failed']
+        if True not in failed_list:
+            return(len(failed_list))
         else:
-            return(df[df['failed']==True].index[0])
+            return(failed_list.index(True))
+        # df = self.get_timestep_data()
+        # if df[df['failed']==True].empty:
+        #     return(len(df))
+        # else:
+        #     return(df[df['failed']==True].index[0])
 
     def _run_timestep(self,timestep_number):
         """
@@ -482,23 +519,37 @@ class Simulation():
         """
         logs results to timestep_data
         """
-        self.__run_timestep_data = self.__run_timestep_data.append(
-            pd.DataFrame({
-                'timestep':pd.Series([timestep+1], dtype='int'),
-                'year':pd.Series([self.get_current_prices()['year']], dtype='int'),
-                'month':pd.Series([self.get_current_prices()['month']], dtype='int'),
-                'cash_buffer':pd.Series([self.get_cash_buffer()], dtype='float'),
-                'bonds_qty':pd.Series([self.get_portfolio()['bonds']], dtype='float'),
-                'stocks_qty':pd.Series([self.get_portfolio()['stocks']], dtype='float'),
-                'gold_qty':pd.Series([self.get_portfolio()['gold']], dtype='float'),
-                'bonds_value':pd.Series([self.get_portfolio()['bonds'] * self.get_current_prices()['bonds']], dtype='float'),
-                'stocks_value':pd.Series([self.get_portfolio()['stocks'] * self.get_current_prices()['stocks']], dtype='float'),
-                'gold_value':pd.Series([self.get_portfolio()['gold'] * self.get_current_prices()['gold']], dtype='float'),
-                'cash_notional':pd.Series([self.get_portfolio()['cash']], dtype='float'),
-                'allowance':pd.Series([self.get_allowance()], dtype='float'),
-                'desired_allowance':pd.Series([self._get_desired_allowance(timestep)], dtype='float'),
-                'failed':pd.Series([self.get_failed_status()], dtype='boolean')
-                }),
-            ignore_index=True
-            )
+        # self.__run_timestep_data = self.__run_timestep_data.append(
+        #     pd.DataFrame({
+        #         'timestep':pd.Series([timestep+1], dtype='int'),
+        #         'year':pd.Series([self.get_current_prices()['year']], dtype='int'),
+        #         'month':pd.Series([self.get_current_prices()['month']], dtype='int'),
+        #         'cash_buffer':pd.Series([self.get_cash_buffer()], dtype='float'),
+        #         'bonds_qty':pd.Series([self.get_portfolio()['bonds']], dtype='float'),
+        #         'stocks_qty':pd.Series([self.get_portfolio()['stocks']], dtype='float'),
+        #         'gold_qty':pd.Series([self.get_portfolio()['gold']], dtype='float'),
+        #         'bonds_value':pd.Series([self.get_portfolio()['bonds'] * self.get_current_prices()['bonds']], dtype='float'),
+        #         'stocks_value':pd.Series([self.get_portfolio()['stocks'] * self.get_current_prices()['stocks']], dtype='float'),
+        #         'gold_value':pd.Series([self.get_portfolio()['gold'] * self.get_current_prices()['gold']], dtype='float'),
+        #         'cash_notional':pd.Series([self.get_portfolio()['cash']], dtype='float'),
+        #         'allowance':pd.Series([self.get_allowance()], dtype='float'),
+        #         'desired_allowance':pd.Series([self._get_desired_allowance(timestep)], dtype='float'),
+        #         'failed':pd.Series([self.get_failed_status()], dtype='boolean')
+        #         }),
+        #     ignore_index=True
+        #     )
+        self.__run_timestep_data['timestep'].append(timestep+1)
+        self.__run_timestep_data['year'].append(self.get_current_prices()['year'])
+        self.__run_timestep_data['month'].append(self.get_current_prices()['month'])
+        self.__run_timestep_data['cash_buffer'].append(self.get_cash_buffer())
+        self.__run_timestep_data['bonds_qty'].append(self.get_portfolio()['bonds'])
+        self.__run_timestep_data['stocks_qty'].append(self.get_portfolio()['stocks'])
+        self.__run_timestep_data['gold_qty'].append(self.get_portfolio()['gold'])
+        self.__run_timestep_data['bonds_value'].append(self.get_portfolio()['bonds'] * self.get_current_prices()['bonds'])
+        self.__run_timestep_data['stocks_value'].append(self.get_portfolio()['stocks'] * self.get_current_prices()['stocks'])
+        self.__run_timestep_data['gold_value'].append(self.get_portfolio()['gold'] * self.get_current_prices()['gold'])
+        self.__run_timestep_data['cash_notional'].append(self.get_portfolio()['cash'])
+        self.__run_timestep_data['allowance'].append(self.get_allowance())
+        self.__run_timestep_data['desired_allowance'].append(self._get_desired_allowance(timestep))
+        self.__run_timestep_data['failed'].append(self.get_failed_status())
         
