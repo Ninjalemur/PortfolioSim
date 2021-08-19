@@ -106,16 +106,17 @@ class Simulator():
 
         # initialise empty data container to store results
         self.__simulator_inputs = {
-                'simulator_id': self.__simulator_id,
-                'starting_portfolio_value': starting_portfolio_value,
-                'desired_annual_income': desired_annual_income,
-                'inflation': inflation,
-                'min_income_multiplier': min_income_multiplier,
-                'max_withdrawal_rate': max_withdrawal_rate,
-                'portfolio_allocation': portfolio_allocation
-                }
+            'simulator_id': self.__simulator_id,
+            'starting_portfolio_value': starting_portfolio_value,
+            'desired_annual_income': desired_annual_income,
+            'inflation': inflation,
+            'min_income_multiplier': min_income_multiplier,
+            'max_withdrawal_rate': max_withdrawal_rate,
+            'portfolio_allocation': portfolio_allocation
+            }
         
         self.__run_results = pd.DataFrame({
+            'simulator_id':pd.Series([], dtype='int'),
             'run_id':pd.Series([], dtype='int'),
             'start_ref_year':pd.Series([], dtype='int'),
             'start_ref_month':pd.Series([], dtype='int'),
@@ -126,6 +127,7 @@ class Simulator():
             })
         
         self.__timestep_data = pd.DataFrame({
+            'simulator_id': self.__simulator_id,
             'run_id':pd.Series([], dtype='int'),
             'timestep':pd.Series([], dtype='int'),
             'year':pd.Series([], dtype='int'),
@@ -387,6 +389,9 @@ class Simulator():
         
         self.__run_results = pd.concat([self.__run_results]+run_results_list,axis=0,ignore_index=True)
         self.__timestep_data = pd.concat([self.__timestep_data]+timestep_data_list,axis=0,ignore_index=True)
+
+        self.__run_results['simulator_id'] = self.__simulator_id
+        self.__timestep_data['simulator_id'] = self.__simulator_id
 
        
     def _generate_simulation_time_frames(self,historical_data,simulation_length_years):
