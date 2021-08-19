@@ -112,6 +112,7 @@ class Simulator():
             'inflation': inflation,
             'min_income_multiplier': min_income_multiplier,
             'max_withdrawal_rate': max_withdrawal_rate,
+            'cash_buffer_years': cash_buffer_years,
             'portfolio_allocation': portfolio_allocation
             }
         
@@ -286,6 +287,7 @@ class Simulator():
             'inflation':pd.Series([self.__simulator_inputs['inflation']], dtype='float'),
             'min_income_multiplier':pd.Series([self.__simulator_inputs['min_income_multiplier']], dtype='float'),
             'max_withdrawal_rate':pd.Series([self.__simulator_inputs['max_withdrawal_rate']], dtype='float'),
+            'cash_buffer_years':pd.Series([self.__simulator_inputs['cash_buffer_years']], dtype='int'),
             'stocks_allocation':pd.Series([self.__simulator_inputs['portfolio_allocation']['stocks']], dtype='float'),
             'bonds_allocation':pd.Series([self.__simulator_inputs['portfolio_allocation']['bonds']], dtype='float'),
             'gold_allocation':pd.Series([self.__simulator_inputs['portfolio_allocation']['gold']], dtype='float'),
