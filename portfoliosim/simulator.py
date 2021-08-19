@@ -436,6 +436,7 @@ class Simulator():
         timestep_data.to_csv(results_folder+'timestep_data.csv',index=False)
 
         historical_data = self.__historical_data
+        historical_data['simulator_id'] = self.__simulator_id
         historical_data.to_csv(results_folder+'historical_data.csv',index=False)
 
         simulation_inputs = self._get_simulator_inputs_df()
