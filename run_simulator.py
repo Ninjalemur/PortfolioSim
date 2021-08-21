@@ -24,7 +24,7 @@ def main():
     x = ps.Simulator(**simulation_cofig)
     print('running basic simulation')
     x.run_simulations()
-    x.write_results('../results/basic/')
+    x.write_results('./results/basic/')
 
     ## run simulations of varying simulation durations
     for i in range(10,51,10):
@@ -32,7 +32,7 @@ def main():
         simulation_cofig["simulation_length_years"] = i 
         x = ps.Simulator(**simulation_cofig)
         x.run_simulations()
-        x.write_results('../results/vary_simulation_years/')
+        x.write_results('./results/vary_simulation_years/')
 
 if __name__ == "__main__":
     start = time.time()
