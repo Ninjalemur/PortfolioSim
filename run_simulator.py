@@ -28,7 +28,7 @@ def main():
 
     ## run simulations of varying simulation durations
     for i in range(10,51,10):
-        print('running simulation for simulation length {i} years')
+        print(f'running simulation for simulation length {i} years')
         simulation_cofig["simulation_length_years"] = i 
         x = ps.Simulator(**simulation_cofig)
         x.run_simulations()
